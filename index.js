@@ -451,3 +451,12 @@
          // Less Customizable
          // Free Tier with limits
          // Multi-Factore Authentication / Passwordless Login           
+
+// CONTENT SECURITY POLICY - Using Nounce to prevent malicious scripts
+// JETBRAINS WEBSTORMS - Testing / Debugging / version control
+// JSON-LD ( Linked Data ) - Identify content of webpage   
+// MDX - Markdown Mark-up Language / Plain text Html
+    // - Allow JSX Directly into markdown file  
+// ESLINT - ( Javascript Linter )    
+       // - Identify Pattern in Javascript 
+       // Avoid bugs / code consistency
