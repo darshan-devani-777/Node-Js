@@ -475,3 +475,4 @@
 
 // DBeaver Community - Database Management Tools
                   // - Support All Databases
+// Use pgAdmin4 // use Vs Code extension - SQLTools / SQLTools postgreSQl                   
