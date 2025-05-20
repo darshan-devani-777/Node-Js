@@ -460,3 +460,18 @@
 // ESLINT - ( Javascript Linter )    
        // - Identify Pattern in Javascript 
        // Avoid bugs / code consistency
+
+// POSTGRESQL :- (ORDBMS) - Object relational database management system
+           // - Support SQL ( Relational ) / Json queries ( Non-Relational )   
+           
+// BASIC PSQL TERMINAL COMMANDS ;- 
+// \l - List Databases
+// \c - Switch or Connect Databases
+// \dt - List Tables
+// \dn - List Schemas
+// \du - List Users
+// \d <TableName> - Describe Table
+// \q - Quit psql      
+
+// DBeaver Community - Database Management Tools
+                  // - Support All Databases
