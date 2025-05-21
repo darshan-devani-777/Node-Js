@@ -18,17 +18,17 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6 relative font-sans">
+    <div className="min-h-screen p-6 relative font-sans">
       {showUserList && (
-        <div className="absolute inset-0 z-20 bg-black bg-opacity-95 flex flex-col items-center justify-start p-6 backdrop-blur-sm">
+        <div className="absolute inset-0 z-20  bg-opacity-95 flex flex-col items-center justify-start p-6 backdrop-blur-2xl">
           <button
             onClick={handleCancel}
-            className="self-end text-2xl font-bold transition mb-4 cursor-pointer border rounded-3xl px-2 py-1 hover:bg-gray-700"
+            className="self-end text-2xl font-bold transition cursor-pointer border rounded-3xl px-2 py-1 hover:bg-gray-700"
             title="Close"
           >
             ❌
           </button>
-          <div className="w-full max-w-3xl overflow-y-auto max-h-[80vh]">
+          <div className="w-full max-w-2xl">
             <UserList />
           </div>
         </div>
