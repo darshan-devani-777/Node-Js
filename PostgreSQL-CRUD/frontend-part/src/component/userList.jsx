@@ -96,7 +96,7 @@ const UserList = () => {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search by ID, Name , Email , or Available Days"
+          placeholder="Search by ID , Name , Email , or Available Days"
           className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -241,13 +241,13 @@ const UserList = () => {
                     <td className="px-4 py-2 text-gray-400 space-x-4">
                       <button
                         onClick={() => handleEditClick(user)}
-                        className="bg-yellow-500 text-white hover:bg-yellow-400 px-4 py-1 rounded-md"
+                        className="bg-yellow-500 text-white hover:bg-yellow-700 px-4 py-1 rounded-md cursor-pointer"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(user.id)}
-                        className="bg-red-500 text-white hover:bg-red-400 px-4 py-1 rounded-md"
+                        className="bg-red-500 text-white hover:bg-red-700 px-4 py-1 rounded-md cursor-pointer"
                       >
                         Delete
                       </button>
