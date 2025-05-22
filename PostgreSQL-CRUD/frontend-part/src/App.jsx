@@ -28,7 +28,7 @@ const App = () => {
           >
             ❌
           </button>
-          <div className="w-full max-w-2xl">
+          <div className="">
             <UserList />
           </div>
         </div>

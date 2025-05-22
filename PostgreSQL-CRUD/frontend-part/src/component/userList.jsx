@@ -11,6 +11,9 @@ const UserList = () => {
     available_days: [],
   });
 
+  // Single search state
+  const [searchQuery, setSearchQuery] = useState("");
+
   const loadUsers = async () => {
     const res = await fetchUsers();
     setUsers(res.data);
@@ -70,20 +73,43 @@ const UserList = () => {
     }
   };
 
+  // Filter Users
+  const filteredUsers = users.filter((user) => {
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    return (
+      user.name.toLowerCase().includes(lowerCaseQuery) ||
+      user.email.toLowerCase().includes(lowerCaseQuery) ||
+      user.available_days?.some((day) =>
+        day.toLowerCase().includes(lowerCaseQuery)
+      ) ||
+      user.id.toString().includes(searchQuery)
+    );
+  });
+
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10 my-14 bg-gray-900 text-white shadow-2xl rounded-2xl flex flex-col overflow-hidden">
-      <h2 className="text-3xl font-bold text-center mb-5 underline decoration-blue-500">
+    <div className="max-w-7xl mx-auto px-6 py-7 my-14 bg-gray-900 text-white shadow-2xl rounded-2xl flex flex-col overflow-hidden">
+      <h2 className="text-3xl font-bold text-center underline decoration-blue-500 mb-8">
         👤 User List
       </h2>
+
+      {/* Single Search Bar */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search by ID, Name , Email , or Available Days"
+          className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
 
       <div className="flex-grow overflow-auto">
         {/* Edit User Form */}
         {editingUser && (
           <form
-          onSubmit={handleUpdate}
-          className="mb-8 bg-gray-800 p-6 rounded-lg shadow-md space-y-4 overflow-visible  overflow-y-auto"
-        >
-        
+            onSubmit={handleUpdate}
+            className="mb-8 bg-gray-800 p-6 rounded-lg shadow-md space-y-4 overflow-visible overflow-y-auto"
+          >
             <h3 className="text-xl font-semibold text-blue-400">Edit User</h3>
 
             <input
@@ -163,66 +189,73 @@ const UserList = () => {
         )}
 
         {/* User List Display */}
-        {users.length === 0 ? (
-          <p className="text-center text-gray-400">No users found.</p>
+        {filteredUsers.length === 0 ? (
+          <p className="text-center text-gray-400">User Not Found.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-            {users.map((user) => (
-              <div
-                key={user.id}
-                className="flex flex-col p-4 border border-gray-700 rounded-lg bg-gray-800 shadow-md"
-              >
-                {/* User Info */}
-                <div className="flex items-center space-x-4 mb-4">
-                  <img
-                    src={`http://localhost:5000/uploads/${user.image}`}
-                    alt={user.name}
-                    className="w-16 h-16 object-cover rounded-full border border-gray-600"
-                  />
-                  <div>
-                    <p className="text-lg font-semibold">{user.name}</p>
-                    <p className="text-sm text-gray-400">{user.email}</p>
-                  </div>
-                </div>
+          <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+            <table className="w-full bg-gray-800 border border-gray-700 rounded-lg">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 text-left text-blue-400">ID</th>
+                  <th className="px-4 py-2 text-left text-blue-400">Image</th>
+                  <th className="px-4 py-2 text-left text-blue-400">Name</th>
+                  <th className="px-4 py-2 text-left text-blue-400">Email</th>
+                  <th className="px-4 py-2 text-left text-blue-400">
+                    Available Days
+                  </th>
+                  <th className="px-4 py-2 text-left text-blue-400">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map((user) => (
+                  <tr key={user.id} className="border-b border-gray-700">
+                    <td className="px-4 py-2 text-gray-400">{user.id}</td>
+                    <td className="px-4 py-2">
+                      <img
+                        src={`http://localhost:5000/uploads/${user.image}`}
+                        alt={user.name}
+                        className="w-12 h-12 object-cover rounded-full border border-gray-600"
+                      />
+                    </td>
+                    <td className="px-4 py-2 text-gray-400">{user.name}</td>
+                    <td className="px-4 py-2 text-gray-400">{user.email}</td>
+                    <td className="px-4 py-2">
+                      {user.available_days?.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {user.available_days.map((day, index) => (
+                            <span
+                              key={index}
+                              className="bg-blue-700 text-white px-3 py-1 rounded-full text-sm font-semibold"
+                            >
+                              {day}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="italic text-gray-400">
+                          No days selected
+                        </span>
+                      )}
+                    </td>
 
-                {/* Availability Days Display */}
-                <div className="mb-4">
-                  <p className="text-sm text-blue-400 underline my-2">
-                    Available Days:
-                  </p>
-                  {user.available_days?.length > 0 ? (
-                    <ul className="flex flex-wrap gap-2 text-sm text-gray-300">
-                      {user.available_days.map((day, i) => (
-                        <li
-                          key={i}
-                          className="bg-blue-600 px-2 py-1 rounded-full my-2"
-                        >
-                          {day}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="italic text-gray-500">No days selected</p>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex justify-between">
-                  <button
-                    onClick={() => handleEditClick(user)}
-                    className="bg-yellow-500 hover:bg-yellow-700 text-white px-4 py-2 rounded-md font-medium transition cursor-pointer"
-                  >
-                    ✏️ Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(user.id)}
-                    className="bg-red-600 hover:bg-red-800 text-white px-4 py-2 rounded-md font-medium transition cursor-pointer"
-                  >
-                    🗑️ Delete
-                  </button>
-                </div>
-              </div>
-            ))}
+                    <td className="px-4 py-2 text-gray-400 space-x-4">
+                      <button
+                        onClick={() => handleEditClick(user)}
+                        className="bg-yellow-500 text-white hover:bg-yellow-400 px-4 py-1 rounded-md"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="bg-red-500 text-white hover:bg-red-400 px-4 py-1 rounded-md"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
