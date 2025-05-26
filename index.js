@@ -476,3 +476,26 @@
 // DBeaver Community - Database Management Tools
                   // - Support All Databases
 // Use pgAdmin4 // use Vs Code extension - SQLTools / SQLTools postgreSQl                   
+
+// POSTGRESQL TOPICS:-
+// Data Types - Different Data-types
+// Managing Tables - Create / Alter / Rename / Add / Drop / Show
+// Modifying Data - Insert / Update / Delete
+// Querying & Filtering Data - Order By / Where / Limit / Like / Not Like / Between / Having / Group By
+// Conditionals Case - Coalesce / nullif() function / Cast
+// Control Flow - If-Else / Case / Loop / For / Exit / Continue
+// joins & Schema - Different joins / Create , Drop , Alter Schema
+// Built-In Functions - Avg() / Count() / Max() / Sum() / Current_Date / Concat / upper / Replace
+// Working with Sets - Union / Intersect / Except / Cube / Rollup
+// Subquery - Any / All / Exists / CTE - Complex query
+// Stored Procedures - Perform Complex Calculation
+// Working with Triggers - Automatic Invoke function / Specific Event Occur
+                      // - After OR Before Trigger
+                      // - Create / Alter / Drop  / Disable / Enable 
+// Working with Indexes - Faster Data retrieve 
+                     // - Create Index on Specific Column
+                     // - Create / Drop / Unique / Reindex
+// Errors - Info / Warning / Notice ( Reported Client Side )  
+       // - Debug / Log ( Reported Server Side )   
+// Exception Handling - User defined / System Defined 
+                   // - Create Custom error handling                                              
