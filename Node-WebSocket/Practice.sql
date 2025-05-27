@@ -202,7 +202,7 @@ LOGIN
 PASSWORD 'mypassword1';
 
 -- Create Superuser Role
-CREATE ROLE Admin
+CREATE ROLE World
 SUPERUSER 
 LOGIN 
 PASSWORD 'mypassword1';
@@ -240,38 +240,3 @@ TO  role_name;
 REVOKE privilege | ALL
 ON TABLE tbl_name 
 FROM role_name;
-
-select * from pg_user;
-
-ALTER TABLE players OWNER TO admin;
-
-select * from players;
-
-INSERT INTO players(first_name, last_name, email, phone)
-VALUES('raju', 'kumar', 'raju.kumar@geeksforgeeks.org', '408-111-2222');
-
-GRANT ALL
-ON  players
-TO  admin;
-
-REVOKE ALL
-ON TABLE players
-FROM admin;
-
-SELECT current_user;
-
-CREATE ROLE admin WITH LOGIN SUPERUSER PASSWORD 'admin@123';
-ALTER ROLE postgres WITH LOGIN;
-ALTER ROLE admin WITH SUPERUSER;
-SELECT current_user, session_user;
-
-SELECT rolname, rolsuper, rolcanlogin 
-FROM pg_roles 
-WHERE rolname = 'admin';
-
-
-
-
-
-
-
