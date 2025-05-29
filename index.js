@@ -498,4 +498,42 @@
 // Errors - Info / Warning / Notice ( Reported Client Side )  
        // - Debug / Log ( Reported Server Side )   
 // Exception Handling - User defined / System Defined 
-                   // - Create Custom error handling                                              
+                   // - Create Custom error handling       
+                   
+// PRISMA (ORM) :- Database Interaction for Node.js
+              // - Typescript Support 
+              // - Auto-generated Query API
+              // - Allow Database Model Clear way
+              // - Managing Database Migrations
+        // Prisma Client - The auto-generated and type-safe query API
+        // Prisma Migrate - A declarative data modeling and migration tool
+        // Prisma Studio - A visual editor for managing your database schema and data 
+        
+// Prisma-Client Project
+        
+        // Step 1: Initialize project
+        // npm init -y
+        
+        // Step 2: Install required packages
+        // npm install express prisma @prisma/client dotenv
+        
+        // Step 3: Initialize Prisma
+        // npx prisma init
+        
+        //  Step 4: Update .env with MySQL URL
+        //  DB_URL="mysql://user:password@localhost:3306/database_name"
+        
+        // Step 5: Define Prisma model in prisma/schema.prisma
+        
+        // Step 6: Generate Prisma client
+        // npx prisma generate
+        
+        // Step 7: Push schema to DB
+        // npx prisma db push
+        
+        // Step 8: Open Prisma Studio (optional but requested)
+        // npx prisma studio
+        
+        // Step 9: Run your Node.js server
+        // node src/server.js
+        
