@@ -39,7 +39,7 @@ exports.getCartItems = async (req, res) => {
       include: { product: true },
     });
 
-    res.status(200).json({message:"Cart Retrieved SuccessFully." , items});
+    res.status(200).json({success:true , message:"Cart Retrieved SuccessFully." , items});
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
