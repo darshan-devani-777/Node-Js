@@ -1,0 +1,294 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
+
+export default function ProductList() {
+  const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [editing, setEditing] = useState(null);
+  const [formVisible, setFormVisible] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    price: "",
+    categories: "",
+    quantity: "",
+  });
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isAdmin = user?.role === "admin" || user?.role === "superadmin";
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await api.get("/products");
+      if (res.data.success && Array.isArray(res.data.products)) {
+        setAllProducts(res.data.products);
+        setProducts(res.data.products);
+      } else {
+        alert(res.data.message || "Failed to fetch products.");
+        setAllProducts([]);
+        setProducts([]);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Error fetching products");
+    }
+  };
+
+  // ✅ Search logic updated
+  const handleSearch = (query) => {
+    const lowerQuery = query.toLowerCase();
+
+    const filtered = allProducts.filter((product) => {
+      const name = product.name?.toLowerCase() || "";
+      const description = product.description?.toLowerCase() || "";
+      const price = product.price?.toString() || "";
+      const categories = Array.isArray(product.categories)
+        ? product.categories.join(", ").toLowerCase()
+        : (product.categories || "").toLowerCase();
+
+      return (
+        name.includes(lowerQuery) ||
+        description.includes(lowerQuery) ||
+        price.includes(lowerQuery) ||
+        categories.includes(lowerQuery)
+      );
+    });
+
+    setProducts(filtered);
+  };
+
+  // Automatically update filtered list when query changes
+  useEffect(() => {
+    handleSearch(searchQuery);
+  }, [searchQuery, allProducts]);
+
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/products/${id}`);
+      fetchProducts();
+    } catch (err) {
+      alert("Delete failed");
+    }
+  };
+
+  const handleEdit = (product) => {
+    setFormVisible(true);
+    setEditing(product._id);
+    setForm({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      categories: product.categories,
+      quantity: product.quantity,
+    });
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await api.put(`/products/${editing}`, form);
+      setEditing(null);
+      setFormVisible(false);
+      setForm({
+        name: "",
+        description: "",
+        price: "",
+        categories: "",
+        quantity: "",
+      });
+      fetchProducts();
+    } catch (err) {
+      alert("Update failed");
+    }
+  };
+
+  const handleCreate = async () => {
+    try {
+      await api.post("/products", form);
+      setForm({
+        name: "",
+        description: "",
+        price: "",
+        categories: "",
+        quantity: "",
+      });
+      setFormVisible(false);
+      fetchProducts();
+    } catch (err) {
+      alert("Create failed");
+    }
+  };
+
+  return (
+    <div className="min-h-screen mx-auto p-6 text-gray-900 bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100">
+      {!formVisible && isAdmin && (
+        <div className="text-right mb-2">
+          <button
+            className="bg-green-600 hover:bg-green-800 text-white px-3 py-1 rounded transition cursor-pointer"
+            onClick={() => setFormVisible(true)}
+          >
+            + Add Product
+          </button>
+        </div>
+      )}
+
+      {formVisible && isAdmin && (
+        <div className="bg-gray-800 text-gray-100 shadow-md p-6 rounded-lg mb-6 space-y-4 border border-gray-300">
+          <input
+            className="border border-gray-400 p-2 w-full rounded"
+            value={form.name}
+            placeholder="Product Name"
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
+          <textarea
+            className="border border-gray-400 p-2 w-full rounded"
+            value={form.description}
+            placeholder="Description"
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+          <input
+            className="border border-gray-400 p-2 w-full rounded"
+            type="number"
+            value={form.price}
+            placeholder="Price"
+            onChange={(e) => setForm({ ...form, price: e.target.value })}
+          />
+          <input
+            className="border border-gray-400 p-2 w-full rounded"
+            value={form.categories}
+            placeholder="Categories"
+            onChange={(e) => setForm({ ...form, categories: e.target.value })}
+          />
+          <input
+            className="border border-gray-400 p-2 w-full rounded"
+            type="number"
+            value={form.quantity}
+            placeholder="Quantity"
+            onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+          />
+          <div className="flex justify-between">
+            <button
+              className={`${
+                editing
+                  ? "bg-blue-600 hover:bg-blue-800"
+                  : "bg-green-600 hover:bg-green-700"
+              } text-white px-4 py-2 rounded transition cursor-pointer`}
+              onClick={editing ? handleUpdate : handleCreate}
+            >
+              {editing ? "Update Product" : "Create Product"}
+            </button>
+            <button
+              onClick={() => {
+                setFormVisible(false);
+                setEditing(null);
+                setForm({
+                  name: "",
+                  description: "",
+                  price: "",
+                  categories: "",
+                  quantity: "",
+                });
+              }}
+              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Search Box */}
+      <div className="flex justify-center">
+        <input
+          type="text"
+          placeholder="🔍  Search by name, description, price, or category..."
+          className="w-full max-w-md p-2 rounded border border-gray-400 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      {/* Product List */}
+      <h3 className="text-xl font-semibold mb-6 underline">Product List</h3>
+      <div className="overflow-x-auto rounded-lg">
+        <table className="min-w-full bg-gradient-to-r from-gray-800 via-gray-700 to-gray-600 border border-gray-700 rounded">
+          <thead>
+            <tr className="bg-gray-800 text-white text-left">
+              <th className="px-4 py-2 border border-gray-600">ID</th>
+              <th className="px-4 py-2 border border-gray-600">Name</th>
+              <th className="px-4 py-2 border border-gray-600">Description</th>
+              <th className="px-4 py-2 border border-gray-600">Price</th>
+              <th className="px-4 py-2 border border-gray-600">Category</th>
+              <th className="px-4 py-2 border border-gray-600">Quantity</th>
+              <th className="px-4 py-2 border border-gray-600">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.length > 0 ? (
+              products.map((product, index) => (
+                <tr key={product._id} className="text-white">
+                  <td className="px-4 py-2 border border-gray-700 bg-gray-800">
+                    {index + 1}
+                  </td>
+                  <td className="px-4 py-2 border border-gray-700 bg-gray-800">
+                    {product.name}
+                  </td>
+                  <td className="px-4 py-2 border border-gray-700 bg-gray-800 text-sm text-gray-400">
+                    {product.description}
+                  </td>
+                  <td className="px-4 py-2 border border-gray-700 bg-gray-800 text-gray-400 text-sm">
+                    ${product.price}
+                  </td>
+                  <td className="px-4 py-2 border border-gray-700 bg-gray-800 text-gray-400 text-sm">
+                    {Array.isArray(product.categories)
+                      ? product.categories.join(", ")
+                      : product.categories}
+                  </td>
+                  <td className="px-4 py-2 border border-gray-700 bg-gray-800 text-gray-400 text-sm">
+                    {product.quantity}
+                  </td>
+                  <td className="px-4 py-2 border border-gray-700 bg-gray-800">
+                    {isAdmin ? (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded cursor-pointer text-sm transition duration-300"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product._id)}
+                          className="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded cursor-pointer text-sm transition duration-300"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm italic">
+                        View Only
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center py-4 text-gray-400 bg-gray-800 text-2xl">
+                  Product Not Found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
