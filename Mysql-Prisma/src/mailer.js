@@ -14,7 +14,7 @@ exports.sendOrderConfirmationEmail = async (to, orderId, totalPrice) => {
     to,
     subject: "Order Confirmation",
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #f9f9f9;">
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 9px; background-color: #f9f9f9;">
         <h2 style="color: #2c3e50;">Order Confirmation</h2>
         <p style="font-size: 16px;">Thank you for your order!</p>
         <p style="font-size: 16px;"><strong>Order ID:</strong> ${orderId}</p>
