@@ -534,6 +534,6 @@
         // Step 8: Open Prisma Studio (optional but requested)
         // npx prisma studio
         
-        // Step 9: Run your Node.js server
+        // Step 9: Run Node.js server
         // node src/server.js
         
