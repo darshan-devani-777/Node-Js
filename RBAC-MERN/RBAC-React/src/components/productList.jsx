@@ -30,6 +30,7 @@ export default function ProductList() {
     fetchProducts();
   }, []);
 
+  // FETCH PRODUCTS
   const fetchProducts = async () => {
     try {
       const res = await api.get("/products");
@@ -46,6 +47,7 @@ export default function ProductList() {
     }
   };
 
+  // SEARCH PRODUCTS
   const handleSearch = (query) => {
     const lowerQuery = query.toLowerCase();
     const filtered = allProducts.filter((product) => {
@@ -71,6 +73,7 @@ export default function ProductList() {
     handleSearch(searchQuery);
   }, [searchQuery, allProducts]);
 
+  // DELETE PRODUCT
   const handleDelete = async (id) => {
     try {
       await api.delete(`/products/${id}`);
@@ -80,6 +83,7 @@ export default function ProductList() {
     }
   };
 
+  // EDIT PRODUCT
   const handleEdit = (product) => {
     setFormVisible(true);
     setEditing(product._id);
@@ -92,6 +96,7 @@ export default function ProductList() {
     });
   };
 
+  // VALIDATE FORM
   const validateForm = async () => {
     try {
       await productValidationSchema.validate(form, { abortEarly: false });
@@ -107,10 +112,10 @@ export default function ProductList() {
     }
   };
 
+  // UPDATE PRODUCT
   const handleUpdate = async () => {
     const isValid = await validateForm();
     if (!isValid) return;
-
     try {
       await api.put(`/products/${editing}`, form);
       setEditing(null);
@@ -122,6 +127,7 @@ export default function ProductList() {
     }
   };
 
+  // CREATE PRODUCT
   const handleCreate = async () => {
     const isValid = await validateForm();
     if (!isValid) return;
@@ -136,6 +142,7 @@ export default function ProductList() {
     }
   };
 
+  // ADD-TO-CART
   const handleAddToCart = async (productId, quantity) => {
     try {
       const res = await api.post("/carts/add", {

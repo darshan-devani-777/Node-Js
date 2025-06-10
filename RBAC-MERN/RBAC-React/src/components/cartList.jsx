@@ -16,6 +16,7 @@ export default function CartList() {
     fetchCarts();
   }, []);
 
+  // FETCH CARTS
   const fetchCarts = async () => {
     try {
       const endpoint = isAdmin ? "/carts/all" : "/carts/cart";
@@ -31,6 +32,7 @@ export default function CartList() {
     }
   };
 
+  // HANDLE QUANTITY CHANGE
   const handleQuantityChange = async (productId, newQty) => {
     if (newQty < 1) return;
     try {
@@ -45,6 +47,7 @@ export default function CartList() {
     }
   };
 
+  // REMOVE PRODUCT
   const handleRemoveProduct = async (productId) => {
     try {
       await api.delete(`/carts/remove/${productId}`);
