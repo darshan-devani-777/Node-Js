@@ -9,7 +9,7 @@ export default function Navbar() {
      ${location.pathname === path ? "underline underline-offset-4" : ""}`; 
 
   return (
-    <nav className="bg-gray-800 text-white p-4 flex justify-between items-center shadow-md sticky top-0 z-50 font-semibold text-xl">
+    <nav className="bg-gray-700 text-white p-4 flex justify-between items-center shadow-md sticky top-0 z-50 font-semibold text-xl">
       <div>
         <Link to="/" className={navLinkStyle("/")}>
           Home
