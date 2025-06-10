@@ -10,7 +10,7 @@ exports.createProduct = async (req, res) => {
       description,
       price,
       categories,
-      quantity, 
+      quantity,   
       createdBy: req.user._id,
     });
 

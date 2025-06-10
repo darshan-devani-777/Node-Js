@@ -14,6 +14,7 @@ export default function Header() {
     setToken(storedToken);
   }, [location]);
 
+  // LOGOUT
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -25,7 +26,6 @@ export default function Header() {
 
   return (
     <header className="bg-gray-800 text-white p-4 flex justify-between items-center">
-      {/* Left side: User info if logged in */}
       <div className="flex items-center gap-4">
         {isLoggedIn && user ? (
           <div className="text-white">
@@ -46,11 +46,10 @@ export default function Header() {
       </div>
 
       <div className="">
-          <h1 className="text-2xl text-gray-200 underline">Role Based Access</h1>
-      </div> 
+        <h1 className="text-2xl text-gray-200 underline">Role Based Access</h1>
+      </div>
 
-      {/* Right side: Navigation */}
-      <nav className="flex gap-4 items-center">
+      <nav className="flex gap-5 items-center">
         {!isLoggedIn ? (
           <>
             <Link
@@ -76,20 +75,52 @@ export default function Header() {
           </>
         ) : (
           <>
-            <Link to="/dashboard" className="text-blue-300 hover:text-white transition duration-30">
-              Dashboard
-            </Link>
-
-            {(user.role === "admin" || user.role === "superadmin" || user.role === "user") && (
+            {(user.role === "admin" ||
+              user.role === "superadmin" ||
+              user.role === "user") && (
               <>
-                <Link to="/users" className="text-blue-300 hover:text-white transition duration-30">
+                <Link
+                  to="/dashboard"
+                  className={`font-medium ${
+                    currentPath === "/dashboard"
+                      ? "text-blue-300 underline underline-offset-4 decoration-2"
+                      : "text-blue-300 hover:text-white"
+                  }`}
+                >
+                  Dashboard
+                </Link>
+
+                <Link
+                  to="/users"
+                  className={`font-medium ${
+                    currentPath === "/users"
+                      ? "text-blue-300 underline underline-offset-4 decoration-2"
+                      : "text-blue-300 hover:text-white"
+                  }`}
+                >
                   Users
                 </Link>
+
                 <Link
                   to="/products"
-                  className="text-blue-300 hover:text-white transition duration-30"
+                  className={`font-medium ${
+                    currentPath === "/products"
+                      ? "text-blue-300 underline underline-offset-4 decoration-2"
+                      : "text-blue-300 hover:text-white"
+                  }`}
                 >
                   Products
+                </Link>
+
+                <Link
+                  to="/carts"
+                  className={`font-medium ${
+                    currentPath === "/carts"
+                      ? "text-blue-300 underline underline-offset-4 decoration-2"
+                      : "text-blue-300 hover:text-white"
+                  }`}
+                >
+                  Carts
                 </Link>
               </>
             )}

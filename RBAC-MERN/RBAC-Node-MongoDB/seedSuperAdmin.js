@@ -11,14 +11,12 @@ const createSuperAdminIfNotExists = async () => {
       console.log("✅ Superadmin already exists.");
       return;
     }
-
     const superadmin = new User({
       name,
       email,
       password,
       role: "superadmin",
     });
-
     await superadmin.save();
     console.log("✅ Superadmin Created Successfully...");
   } catch (err) {

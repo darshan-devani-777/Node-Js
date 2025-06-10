@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { registerValidationSchema } from "../validation/validation";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -10,13 +11,13 @@ export default function Dashboard() {
     role: "",
     password: "",
   });
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     let saved = JSON.parse(localStorage.getItem("user"));
-    console.log("User from localStorage:", saved);
     if (!saved) return navigate("/login");
 
     if (!saved._id && saved.id) {
@@ -43,15 +44,31 @@ export default function Dashboard() {
       role: user.role,
       password: "",
     });
+    setErrors({});
     setIsEditing(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    console.log("User _id in handleSubmit:", user?._id);
+    setErrors({});
+
+    let validationData = {
+      name: form.name,
+      email: form.email,
+      role: form.role,
+    };
+
+    if (form.password.trim() !== "") {
+      validationData.password = form.password;
+    }
 
     try {
+      await registerValidationSchema.validate(validationData, {
+        abortEarly: false,
+      });
+
+      setLoading(true);
+
       const token = localStorage.getItem("token");
 
       const payload = {
@@ -59,7 +76,7 @@ export default function Dashboard() {
         email: form.email,
       };
 
-      if (form.password && form.password.trim() !== "") {
+      if (form.password.trim() !== "") {
         payload.password = form.password;
       }
 
@@ -96,8 +113,18 @@ export default function Dashboard() {
       } else {
         alert(res.data.message || "Update failed");
       }
-    } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong");
+    } catch (validationError) {
+      if (validationError.name === "ValidationError") {
+        const newErrors = {};
+        validationError.inner.forEach((err) => {
+          newErrors[err.path] = err.message;
+        });
+        setErrors(newErrors);
+      } else {
+        alert(
+          validationError.response?.data?.message || "Something went wrong"
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -147,9 +174,15 @@ export default function Dashboard() {
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.name
+                      ? "border-red-500 focus:ring-red-400"
+                      : "border-gray-300 focus:ring-indigo-300"
+                  }`}
                 />
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                )}
               </div>
 
               <div>
@@ -158,9 +191,15 @@ export default function Dashboard() {
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.email
+                      ? "border-red-500 focus:ring-red-400"
+                      : "border-gray-300 focus:ring-indigo-300"
+                  }`}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                )}
               </div>
 
               <div>
@@ -176,9 +215,16 @@ export default function Dashboard() {
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.password
+                      ? "border-red-500 focus:ring-red-400"
+                      : "border-gray-300 focus:ring-indigo-300"
+                  }`}
                   placeholder="Enter new password"
                 />
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                )}
               </div>
 
               <div>
@@ -188,12 +234,17 @@ export default function Dashboard() {
                   value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value })}
                   disabled={user.role !== "superadmin"}
-                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
                     user.role !== "superadmin"
-                      ? "bg-gray-100 cursor-not-allowed"
-                      : ""
+                      ? "bg-gray-100 cursor-not-allowed border-gray-300"
+                      : errors.role
+                      ? "border-red-500 focus:ring-red-400"
+                      : "border-gray-300 focus:ring-indigo-300"
                   }`}
                 />
+                {errors.role && (
+                  <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+                )}
               </div>
 
               <div className="flex space-x-4 pt-2">

@@ -452,7 +452,7 @@
          // Free Tier with limits
          // Multi-Factore Authentication / Passwordless Login           
 
-// CONTENT SECURITY POLICY - Using Nounce to prevent malicious scripts
+// CONTENT SECURITY POLICY - Using Nonce to prevent malicious scripts
 // JETBRAINS WEBSTORMS - Testing / Debugging / version control
 // JSON-LD ( Linked Data ) - Identify content of webpage   
 // MDX - Markdown Mark-up Language / Plain text Html

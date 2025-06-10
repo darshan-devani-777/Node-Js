@@ -7,6 +7,7 @@ const createSuperAdminIfNotExists = require("./seedSuperAdmin");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/carts", cartRoutes);
 
 // DATABASE CONNECTION
 const connectDB = async () => {

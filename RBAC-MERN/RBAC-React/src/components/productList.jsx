@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { productValidationSchema } from "../validation/validation";
 
 export default function ProductList() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ export default function ProductList() {
     categories: "",
     quantity: "",
   });
+  const [quantities, setQuantities] = useState({});
+  const [errors, setErrors] = useState({});
 
   const user = JSON.parse(localStorage.getItem("user"));
   const isAdmin = user?.role === "admin" || user?.role === "superadmin";
@@ -43,10 +46,8 @@ export default function ProductList() {
     }
   };
 
-  // ✅ Search logic updated
   const handleSearch = (query) => {
     const lowerQuery = query.toLowerCase();
-
     const filtered = allProducts.filter((product) => {
       const name = product.name?.toLowerCase() || "";
       const description = product.description?.toLowerCase() || "";
@@ -66,7 +67,6 @@ export default function ProductList() {
     setProducts(filtered);
   };
 
-  // Automatically update filtered list when query changes
   useEffect(() => {
     handleSearch(searchQuery);
   }, [searchQuery, allProducts]);
@@ -92,18 +92,30 @@ export default function ProductList() {
     });
   };
 
+  const validateForm = async () => {
+    try {
+      await productValidationSchema.validate(form, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (validationErrors) {
+      const newErrors = {};
+      validationErrors.inner.forEach((error) => {
+        newErrors[error.path] = error.message;
+      });
+      setErrors(newErrors);
+      return false;
+    }
+  };
+
   const handleUpdate = async () => {
+    const isValid = await validateForm();
+    if (!isValid) return;
+
     try {
       await api.put(`/products/${editing}`, form);
       setEditing(null);
       setFormVisible(false);
-      setForm({
-        name: "",
-        description: "",
-        price: "",
-        categories: "",
-        quantity: "",
-      });
+      resetForm();
       fetchProducts();
     } catch (err) {
       alert("Update failed");
@@ -111,20 +123,44 @@ export default function ProductList() {
   };
 
   const handleCreate = async () => {
+    const isValid = await validateForm();
+    if (!isValid) return;
+
     try {
       await api.post("/products", form);
-      setForm({
-        name: "",
-        description: "",
-        price: "",
-        categories: "",
-        quantity: "",
-      });
+      resetForm();
       setFormVisible(false);
       fetchProducts();
     } catch (err) {
       alert("Create failed");
     }
+  };
+
+  const handleAddToCart = async (productId, quantity) => {
+    try {
+      const res = await api.post("/carts/add", {
+        productId,
+        quantity,
+      });
+      if (res.data.success) {
+        alert("Product added to cart!");
+      } else {
+        alert(res.data.message || "Failed to add to cart");
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Error adding to cart");
+    }
+  };
+
+  const resetForm = () => {
+    setForm({
+      name: "",
+      description: "",
+      price: "",
+      categories: "",
+      quantity: "",
+    });
+    setErrors({});
   };
 
   return (
@@ -148,12 +184,20 @@ export default function ProductList() {
             placeholder="Product Name"
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
+          {errors.name && <p className="text-red-400 text-sm">{errors.name}</p>}
+
           <textarea
             className="border border-gray-400 p-2 w-full rounded"
             value={form.description}
             placeholder="Description"
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, description: e.target.value })
+            }
           />
+          {errors.description && (
+            <p className="text-red-400 text-sm">{errors.description}</p>
+          )}
+
           <input
             className="border border-gray-400 p-2 w-full rounded"
             type="number"
@@ -161,12 +205,20 @@ export default function ProductList() {
             placeholder="Price"
             onChange={(e) => setForm({ ...form, price: e.target.value })}
           />
+          {errors.price && (
+            <p className="text-red-400 text-sm">{errors.price}</p>
+          )}
+
           <input
             className="border border-gray-400 p-2 w-full rounded"
             value={form.categories}
             placeholder="Categories"
             onChange={(e) => setForm({ ...form, categories: e.target.value })}
           />
+          {errors.categories && (
+            <p className="text-red-400 text-sm">{errors.categories}</p>
+          )}
+
           <input
             className="border border-gray-400 p-2 w-full rounded"
             type="number"
@@ -174,6 +226,10 @@ export default function ProductList() {
             placeholder="Quantity"
             onChange={(e) => setForm({ ...form, quantity: e.target.value })}
           />
+          {errors.quantity && (
+            <p className="text-red-400 text-sm">{errors.quantity}</p>
+          )}
+
           <div className="flex justify-between">
             <button
               className={`${
@@ -189,13 +245,7 @@ export default function ProductList() {
               onClick={() => {
                 setFormVisible(false);
                 setEditing(null);
-                setForm({
-                  name: "",
-                  description: "",
-                  price: "",
-                  categories: "",
-                  quantity: "",
-                });
+                resetForm();
               }}
               className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded cursor-pointer"
             >
@@ -205,23 +255,21 @@ export default function ProductList() {
         </div>
       )}
 
-      {/* Search Box */}
-      <div className="flex justify-center">
+      <div className="flex justify-center mb-4">
         <input
           type="text"
-          placeholder="🔍  Search by name, description, price, or category..."
+          placeholder="🔍 Search by name, description, price, or category..."
           className="w-full max-w-md p-2 rounded border border-gray-400 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
-      {/* Product List */}
       <h3 className="text-xl font-semibold mb-6 underline">Product List</h3>
       <div className="overflow-x-auto rounded-lg">
         <table className="min-w-full bg-gradient-to-r from-gray-800 via-gray-700 to-gray-600 border border-gray-700 rounded">
           <thead>
-            <tr className="bg-gray-800 text-white text-left">
+            <tr className="bg-gray-700 text-white text-left">
               <th className="px-4 py-2 border border-gray-600">ID</th>
               <th className="px-4 py-2 border border-gray-600">Name</th>
               <th className="px-4 py-2 border border-gray-600">Description</th>
@@ -256,32 +304,54 @@ export default function ProductList() {
                     {product.quantity}
                   </td>
                   <td className="px-4 py-2 border border-gray-700 bg-gray-800">
-                    {isAdmin ? (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded cursor-pointer text-sm transition duration-300"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(product._id)}
-                          className="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded cursor-pointer text-sm transition duration-300"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-gray-400 text-sm italic">
-                        View Only
-                      </span>
-                    )}
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="number"
+                        min="1"
+                        className="w-16 px-2 py-1 rounded bg-gray-700 text-white"
+                        value={quantities[product._id] || 1}
+                        onChange={(e) =>
+                          setQuantities({
+                            ...quantities,
+                            [product._id]: parseInt(e.target.value),
+                          })
+                        }
+                      />
+                      <button
+                        onClick={() =>
+                          handleAddToCart(product._id, quantities[product._id] || 1)
+                        }
+                        className="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded cursor-pointer text-sm transition duration-300"
+                      >
+                        Add to Cart
+                      </button>
+
+                      {isAdmin && (
+                        <>
+                          <button
+                            onClick={() => handleEdit(product)}
+                            className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded cursor-pointer text-sm transition duration-300"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(product._id)}
+                            className="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded cursor-pointer text-sm transition duration-300"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center py-4 text-gray-400 bg-gray-800 text-2xl">
+                <td
+                  colSpan="7"
+                  className="text-center py-4 text-gray-400 bg-gray-800 text-2xl"
+                >
                   Product Not Found.
                 </td>
               </tr>

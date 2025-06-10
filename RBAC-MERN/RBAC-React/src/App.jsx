@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import Header from "./components/header";
 import Register from "./components/register";
 import Login from "./components/login";
 import UserList from "./components/userList";
 import Dashboard from "./components/dashboard";
 import ProductList from "./components/ProductList";
-import PrivateRoute from "./components/PrivateRoute";
+import CartList from "./components/cartList";
+import { ProtectedRoute, RedirectIfLoggedInRoute } from "./components/protectedroute";
 
 function App() {
   return (
@@ -13,37 +15,61 @@ function App() {
       <Header />
       <div className="">
         <Routes>
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
+
+          <Route
+            path="/register"
+            element={
+              <RedirectIfLoggedInRoute>
+                <Register />
+              </RedirectIfLoggedInRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <RedirectIfLoggedInRoute>
+                <Login />
+              </RedirectIfLoggedInRoute>
+            }
+          />
 
           {/* Protected routes */}
           <Route
             path="/dashboard"
             element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <Dashboard />
-              </PrivateRoute>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/users"
             element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <UserList />
-              </PrivateRoute>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/products"
             element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <ProductList />
-              </PrivateRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/carts"
+            element={
+              <ProtectedRoute>
+                <CartList />
+              </ProtectedRoute>
             }
           />
 
-          {/* Redirect unknown paths to login */}
-          <Route path="*" element={<Login />} />
+          {/* redirect unknown routes to login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+
         </Routes>
       </div>
     </BrowserRouter>
