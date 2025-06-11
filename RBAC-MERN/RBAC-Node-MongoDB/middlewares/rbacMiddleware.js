@@ -1,10 +1,11 @@
 const User = require("../models/userModel");
 const mongoose = require("mongoose");
+const { StatusCodes } = require("http-status-codes");
 
 // Middleware to check if user is SuperAdmin
 exports.isSuperAdmin = (req, res, next) => {
   if (req.user.role !== "superadmin") {
-    return res.status(403).json({ message: "Requires superadmin role" });
+    return res.json({ stausCode:StatusCodes.FORBIDDEN , success:false , message: "Requires superadmin role" });
   }
   next();
 };
@@ -13,8 +14,7 @@ exports.isSuperAdmin = (req, res, next) => {
 exports.isAdminOrSuperAdmin = (req, res, next) => {
   if (req.user.role !== "admin" && req.user.role !== "superadmin") {
     return res
-      .status(403)
-      .json({ message: "Requires admin or superadmin role" });
+      .json({ stausCode:StatusCodes.FORBIDDEN , success:false , message: "Requires admin or superadmin role" });
   }
   next();
 };
@@ -36,7 +36,7 @@ exports.canManageUser = async (req, res, next) => {
     // Validate id format (must be a valid ObjectId)
     if (!mongoose.Types.ObjectId.isValid(id)) {
       console.log("Invalid user ID format");
-      return res.status(400).json({ message: "Invalid user ID" });
+      return res.json({ statusCode:StatusCodes.BAD_REQUEST , success:false , message: "Invalid user ID" });
     }
 
     // Superadmin can manage all
@@ -57,7 +57,7 @@ exports.canManageUser = async (req, res, next) => {
 
       if (!targetUser) {
         console.log("User not found");
-        return res.status(404).json({ message: "User not found" });
+        return res.json({ statusCode:StatusCodes.NOT_FOUND , success:false , message: "User not found" });
       }
 
       if (targetUser.role && targetUser.role.toLowerCase() === "user") {
@@ -67,7 +67,9 @@ exports.canManageUser = async (req, res, next) => {
         console.log(
           "Forbidden: Admin tried to manage a non-user or protected role"
         );
-        return res.status(403).json({
+        return res.json({
+          statusCode:StatusCodes.FORBIDDEN,
+          success:false,
           message: "Admins can only manage users and their own profile",
         });
       }
@@ -80,7 +82,9 @@ exports.canManageUser = async (req, res, next) => {
         return next();
       } else {
         console.log("Forbidden: user tried to manage another profile");
-        return res.status(403).json({
+        return res.json({
+          statusCode:StatusCodes.FORBIDDEN,
+          success:false,
           message: "Users can only manage their own profile",
         });
       }
@@ -88,9 +92,9 @@ exports.canManageUser = async (req, res, next) => {
 
     // Default deny if no matching role
     console.log("Unauthorized access attempt");
-    return res.status(403).json({ message: "Unauthorized" });
+    return res.json({ statusCode:StatusCodes.FORBIDDEN , success:false , message: "Unauthorized" });
   } catch (error) {
     console.error("Authorization error:", error);
-    return res.status(500).json({ message: "Server error" });
+    return res.json({ stausCode:StatusCodes.INTERNAL_SERVER_ERROR , success:false , message: "Server error" });
   }
 };

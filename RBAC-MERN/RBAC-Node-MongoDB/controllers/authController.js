@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
+const { StatusCodes } = require("http-status-codes");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1d";
@@ -19,8 +20,7 @@ exports.register = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser)
       return res
-        .status(400)
-        .json({ success: false, message: "User already exists" });
+        .json({ statusCode:StatusCodes.BAD_REQUEST , success: false, message: "User already exists" });
 
     let assignedRole = "user";
 
@@ -34,13 +34,13 @@ exports.register = async (req, res) => {
 
         if (!caller) {
           return res
-            .status(401)
-            .json({ success: false, message: "Invalid token user" });
+            .json({ statusCode:StatusCodes.UNAUTHORIZED , success: false, message: "Invalid token user" });
         }
 
         if (role && role !== "user") {
           if (caller.role !== "superadmin") {
-            return res.status(403).json({
+            return res.json({
+              statusCode:StatusCodes.FORBIDDEN,
               success: false,
               message: "Only superadmin can assign roles other than 'user'",
             });
@@ -49,8 +49,7 @@ exports.register = async (req, res) => {
         }
       } catch (err) {
         return res
-          .status(401)
-          .json({ success: false, message: "Invalid or expired token" });
+          .json({ statusCode:StatusCodes.UNAUTHORIZED , success: false, message: "Invalid or expired token" });
       }
     }
 
@@ -59,7 +58,8 @@ exports.register = async (req, res) => {
 
     const token = generateToken(user);
 
-    return res.status(201).json({
+    return res.json({
+      statusCode:StatusCodes.CREATED,
       success: true,
       message: "User Registered Successfully...",
       token,
@@ -72,7 +72,7 @@ exports.register = async (req, res) => {
     });
   } catch (err) {
     console.error("Register error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Server error" });
   }
 };
 
@@ -84,18 +84,17 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user)
       return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password" });
+        .json({ statusCode:StatusCodes.UNAUTHORIZED , success: false, message: "Invalid email or password" });
 
     const isMatch = await user.matchPassword(password);
     if (!isMatch)
       return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password" });
+        .json({ statusCode:StatusCodes.UNAUTHORIZED , success: false, message: "Invalid email or password" });
 
     const token = generateToken(user);
 
-    res.status(200).json({
+    res.json({
+      statusCode:StatusCodes.OK,
       success: true,
       message: "User Login Successfully...",
       token,
@@ -108,6 +107,6 @@ exports.login = async (req, res) => {
     });
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Server error" });
   }
 };

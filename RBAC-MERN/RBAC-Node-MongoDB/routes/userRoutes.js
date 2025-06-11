@@ -18,6 +18,6 @@ router.delete("/:id", protect, canManageUser, deleteUserById);
 
 // Admin/Superadmin Only
 router.get("/", protect, isAdminOrSuperAdmin, getAllUsers);
-router.get("/role", protect ,isSuperAdmin, getAllRoles);
+router.get("/role", protect , isSuperAdmin, getAllRoles);
 
 module.exports = router;

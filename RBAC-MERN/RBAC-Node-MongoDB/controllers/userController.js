@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
+const { StatusCodes } = require("http-status-codes");
 
 // GET ALL USER
 exports.getAllUsers = async (req, res) => {
@@ -11,16 +12,17 @@ exports.getAllUsers = async (req, res) => {
     } else if (req.user.role === "admin") {
       users = await User.find({ role: "user" }, "-password");
     } else {
-      return res.status(403).json({ success: false, message: "Access denied" });
+      return res.json({ statusCode:StatusCodes.FORBIDDEN , success: false, message: "Access denied" });
     }
 
-    res.status(200).json({
+    res.json({
+      statusCode:StatusCodes.OK,
       success: true,
       message: "Users Fetched Successfully...",
       users: users || [],
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Server error" });
+    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Server error" });
   }
 };
 
@@ -28,14 +30,15 @@ exports.getAllUsers = async (req, res) => {
 exports.getAllRoles = async (req, res) => {
   try {
     const roles = await User.distinct("role");
-    res.status(200).json({
+    res.json({
+      statusCode:StatusCodes.OK,
       success: true,
       message: "Roles Fetched Successfully...",
       roles: roles || [],
     });
   } catch (err) {
     console.error("Error fetching roles:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Server error" });
   }
 };
 
@@ -45,16 +48,16 @@ exports.getUserById = async (req, res) => {
     const user = await User.findById(req.params.id, "-password");
     if (!user)
       return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+        .json({ statusCode:StatusCodes.NOT_FOUND , success: false, message: "User not found" });
 
-    res.status(200).json({
+    res.json({
+      statusCode:StatusCodes.OK,
       success: true,
       message: "User Fetched Successfully...",
       user,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Server error" });
+    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Server error" });
   }
 };
 
@@ -84,7 +87,7 @@ exports.updateUserById = async (req, res) => {
     });
 
     if (!updatedUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.json({ statusCode:StatusCodes.NOT_FOUND , success:false , message: "User not found" });
     }
 
     const userResponse = {
@@ -94,10 +97,10 @@ exports.updateUserById = async (req, res) => {
       role: updatedUser.role,
     };
 
-    return res.json({ success: true, message:"User Updated Successfully..." , user: userResponse });
+    return res.json({ statusCode:StatusCodes.OK , success: true, message:"User Updated Successfully..." , user: userResponse });
   } catch (error) {
     console.error("Error updating user:", error);
-    return res.status(500).json({ message: "Server error" });
+    return res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success:false , message: "Server error" });
   }
 };
 
@@ -108,15 +111,15 @@ exports.deleteUserById = async (req, res) => {
 
     if (!user)
       return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+        .json({ statusCode:StatusCodes.NOT_FOUND , success: false , message: "User not found" });
 
-    res.status(200).json({
+    res.json({
+      statusCode:StatusCodes.OK,
       success: true,
       message: "User Deleted Successfully...",
     });
   } catch (err) {
     console.error("Delete Error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Server error" });
   }
 };

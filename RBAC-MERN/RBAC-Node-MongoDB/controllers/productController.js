@@ -1,4 +1,5 @@
 const Product = require("../models/product.model");
+const { StatusCodes } = require("http-status-codes");
 
 // CREATE PRODUCT (admin / superadmin only)
 exports.createProduct = async (req, res) => {
@@ -16,13 +17,14 @@ exports.createProduct = async (req, res) => {
 
     const savedProduct = await newProduct.save();
 
-    res.status(201).json({
+    res.json({
+      statusCode:StatusCodes.CREATED,
       success: true,
       message: "Product Created Successfully",
       product: savedProduct,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Internal Server Error" });
   }
 };
 
@@ -30,9 +32,9 @@ exports.createProduct = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find().populate("createdBy", "name email role");
-    res.status(200).json({ success: true, products });
+    res.json({ statusCode:StatusCodes.OK , success: true, products });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Internal Server Error" });
   }
 };
 
@@ -40,11 +42,11 @@ exports.getAllProducts = async (req, res) => {
 exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate("createdBy", "name email role");
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (!product) return res.status(404).json({ statusCode:StatusCodes.NOT_FOUND , success:false , message: "Product not found" });
 
-    res.status(200).json({ success: true, product });
+    res.json({ statusCode:StatusCodes.OK , success: true , message: "Product Retrieved Successfully..." , product });
   } catch (err) {
-    res.status(500).json({ message: "Internal Server Error" });
+    res.json({ statusbar:StatusCodes.INTERNAL_SERVER_ERROR , success:false , message: "Internal Server Error" });
   }
 };
 
@@ -72,10 +74,11 @@ exports.deleteProduct = async (req, res) => {
     const product = await Product.findById(req.params.id).populate("createdBy", "name email role");
 
     if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return json({ statusCode:StatusCodes.NOT_FOUND , success: false, message: "Product not found" });
     }
     await Product.findByIdAndDelete(req.params.id);
-    res.status(200).json({
+    res.json({
+      statusCode:StatusCodes.OK,
       success: true,
       message: "Product Deleted Successfully",
       deletedProduct: product,
@@ -83,7 +86,7 @@ exports.deleteProduct = async (req, res) => {
 
   } catch (err) {
     console.error("Delete Error:", err);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Internal Server Error" });
   }
 };
 
@@ -91,8 +94,8 @@ exports.deleteProduct = async (req, res) => {
 exports.getAllCategories = async (req, res) => {
   try {
     const categories = await Product.distinct("categories");
-    res.status(200).json({ success: true, message: "Fetched All Categories..." , categories });
+    res.json({ statusCode:StatusCodes.OK , success: true, message: "Fetched All Categories..." , categories });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Internal Server Error" });
   }
 };
