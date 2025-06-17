@@ -12,9 +12,10 @@ export default function Login() {
     onSubmit: async (values) => {
       try {
         const res = await api.post("/auth/login", values);
+        console.log("Login response", res.data);
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
-        navigate("/dashboard");
+        navigate("/profile");
       } catch (err) {
         alert(err.response?.data?.message || "Login error");
       }
@@ -23,15 +24,15 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 px-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-700 underline">Login</h2>
-
+      <div className="w-full max-w-md bg-gray-900 p-8 rounded-xl shadow-lg">
+        <h2 className="text-2xl font-bold mb-6 text-center text-white underline">Login</h2>
+  
         <form onSubmit={formik.handleSubmit} className="space-y-4">
           <input
             type="email"
             name="email"
             placeholder="Email"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.email}
@@ -39,12 +40,12 @@ export default function Login() {
           {formik.touched.email && formik.errors.email && (
             <p className="text-red-500 text-sm">{formik.errors.email}</p>
           )}
-
+  
           <input
             type="password"
             name="password"
             placeholder="Password"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.password}
@@ -52,17 +53,17 @@ export default function Login() {
           {formik.touched.password && formik.errors.password && (
             <p className="text-red-500 text-sm">{formik.errors.password}</p>
           )}
-
+  
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-800 transition cursor-pointer"
           >
             Login
           </button>
-
-          <p className="text-center text-sm text-gray-600 mt-4">
+  
+          <p className="text-center text-sm text-gray-400 mt-4">
             Don’t have an account?{" "}
-            <Link to="/register" className="text-blue-600 hover:underline font-medium">
+            <Link to="/register" className="text-blue-400 hover:underline font-medium">
               Register
             </Link>
           </p>

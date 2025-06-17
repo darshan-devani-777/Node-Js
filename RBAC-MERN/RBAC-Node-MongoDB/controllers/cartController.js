@@ -1,5 +1,5 @@
-const Cart = require("../models/cart.model");
-const Product = require("../models/product.model");
+const Cart = require("../models/cartModel");
+const Product = require("../models/productModel");
 const User = require("../models/userModel");
 const { StatusCodes } = require("http-status-codes");
 
@@ -10,15 +10,26 @@ exports.addProductToCart = async (req, res) => {
     const { productId, quantity } = req.body;
 
     if (!quantity || quantity <= 0) {
-      return res.json({ statusCode:StatusCodes.BAD_REQUEST , success: false, message: "Quantity must be at least 1" });
+      return res.json({
+        statusCode: StatusCodes.BAD_REQUEST,
+        success: false,
+        message: "Quantity must be at least 1",
+      });
     }
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res.json({ statusCode:StatusCodes.NOT_FOUND , success: false, message: "Product not found" });
+      return res.json({
+        statusCode: StatusCodes.NOT_FOUND,
+        success: false,
+        message: "Product not found",
+      });
     }
 
-    let cart = await Cart.findOne({ user: userId, "products.product": productId });
+    let cart = await Cart.findOne({
+      user: userId,
+      "products.product": productId,
+    });
 
     if (cart) {
       const productIndex = cart.products.findIndex(
@@ -30,19 +41,20 @@ exports.addProductToCart = async (req, res) => {
 
       if (totalRequestedQuantity > product.quantity + currentQuantity) {
         return res.json({
-          statusCode:StatusCodes.BAD_REQUEST,
+          statusCode: StatusCodes.BAD_REQUEST,
           success: false,
-          message: `Cannot add ${quantity} items. Only ${product.quantity - currentQuantity} left in stock.`,
+          message: `Cannot add ${quantity} items. Only ${
+            product.quantity - currentQuantity
+          } left in stock.`,
         });
       }
 
       cart.products[productIndex].quantity = totalRequestedQuantity;
       await cart.save();
-
     } else {
       if (quantity > product.quantity) {
         return res.json({
-          statusCode:StatusCodes.BAD_REQUEST,
+          statusCode: StatusCodes.BAD_REQUEST,
           success: false,
           message: `Cannot add ${quantity} items. Only ${product.quantity} left in stock.`,
         });
@@ -64,7 +76,9 @@ exports.addProductToCart = async (req, res) => {
     const addedProductEntry = cart.products.find(
       (p) => p.product.toString() === productId
     );
-    const populatedProduct = await Product.findById(productId).select("name price description");
+    const populatedProduct = await Product.findById(productId).select(
+      "name price description"
+    );
 
     const addedProduct = {
       quantity: addedProductEntry.quantity,
@@ -72,7 +86,7 @@ exports.addProductToCart = async (req, res) => {
     };
 
     res.json({
-      statusCode:StatusCodes.OK,
+      statusCode: StatusCodes.OK,
       success: true,
       message: "Product Added to cart",
       cart,
@@ -80,52 +94,66 @@ exports.addProductToCart = async (req, res) => {
     });
   } catch (error) {
     console.error("Add to cart error:", error);
-    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Internal Server Error" });
+    res.json({
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
 
 // GET USER SPECIFIC CART ( Access All by Own cart )
 exports.getUserCart = async (req, res) => {
   try {
-    const requester = req.user; 
+    const requester = req.user;
     let userIdToFetch;
 
-    if (requester.role === "superadmin") {
-      userIdToFetch = req.query.userId || null;
+    console.log("Requester:", requester);
+    console.log("Request Params:", req.params);
 
-      if (!userIdToFetch) {
-        return res.json({
-          statusCode:StatusCodes.BAD_REQUEST,
+    if (requester.role === "superadmin") {
+      userIdToFetch = req.params.id;
+
+      if (!mongoose.Types.ObjectId.isValid(userIdToFetch)) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
           success: false,
-          message: "Please provide userId",
+          message: "Invalid user ID format",
         });
       }
     } else {
-      userIdToFetch = requester._id;
-    }
+      userIdToFetch = requester._id.toString();
 
-    if (!userIdToFetch) {
-      return res.json({ statusCode:StatusCodes.BAD_REQUEST , success: false, message: "Invalid user ID" });
+      if (req.params.id && req.params.id !== userIdToFetch) {
+        return res.status(StatusCodes.FORBIDDEN).json({
+          success: false,
+          message: "You are not authorized to access this cart",
+        });
+      }
     }
 
     const cart = await Cart.findOne({ user: userIdToFetch })
       .populate("products.product", "name price description")
       .populate("user", "name email");
 
-    if (!cart)
-      return res
-        .json({ statusCode:StatusCodes.OK , success: true, message: "Cart is empty", cart: null });
+    if (!cart) {
+      return res.status(StatusCodes.OK).json({
+        success: true,
+        message: "Cart is empty",
+        cart: null,
+      });
+    }
 
-    res.json({
-      statusCode:StatusCodes.OK,
+    return res.status(StatusCodes.OK).json({
       success: true,
-      message: "Cart Fetched Successfully...",
+      message: "Cart fetched successfully",
       cart,
     });
-
   } catch (error) {
     console.error("Get cart error:", error);
-    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Internal Server Error" });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
@@ -137,7 +165,7 @@ exports.updateProductQuantity = async (req, res) => {
 
     if (quantity < 1) {
       return res.json({
-        statusCode:StatusCodes.BAD_REQUEST,
+        statusCode: StatusCodes.BAD_REQUEST,
         success: false,
         message: "Quantity must be at least 1",
       });
@@ -146,7 +174,7 @@ exports.updateProductQuantity = async (req, res) => {
     const cart = await Cart.findOne({ user: userId });
     if (!cart) {
       return res.json({
-        statusCode:StatusCodes.NOT_FOUND,
+        statusCode: StatusCodes.NOT_FOUND,
         success: false,
         message: "Cart not found",
       });
@@ -157,7 +185,7 @@ exports.updateProductQuantity = async (req, res) => {
     );
     if (productIndex === -1) {
       return res.json({
-        statusCode:StatusCodes.NOT_FOUND,
+        statusCode: StatusCodes.NOT_FOUND,
         success: false,
         message: "Product not found in cart",
       });
@@ -166,7 +194,7 @@ exports.updateProductQuantity = async (req, res) => {
     const product = await Product.findById(productId);
     if (!product) {
       return res.json({
-        statusCode:StatusCodes.NOT_FOUND,
+        statusCode: StatusCodes.NOT_FOUND,
         success: false,
         message: "Product not found",
       });
@@ -179,15 +207,15 @@ exports.updateProductQuantity = async (req, res) => {
     if (quantityDifference > 0) {
       if (quantityDifference > product.quantity) {
         return res.json({
-          statusCode:StatusCodes.BAD_REQUEST,
+          statusCode: StatusCodes.BAD_REQUEST,
           success: false,
           message: `Only ${product.quantity} items available in stock.`,
         });
       }
 
-      product.quantity -= quantityDifference; 
+      product.quantity -= quantityDifference;
     } else if (quantityDifference < 0) {
-      product.quantity += Math.abs(quantityDifference); 
+      product.quantity += Math.abs(quantityDifference);
     }
     await product.save();
 
@@ -196,7 +224,7 @@ exports.updateProductQuantity = async (req, res) => {
     await cart.save();
 
     res.json({
-      statusCode:StatusCodes.OK,
+      statusCode: StatusCodes.OK,
       success: true,
       message: "Cart and product stock updated successfully",
       cart,
@@ -204,7 +232,7 @@ exports.updateProductQuantity = async (req, res) => {
   } catch (error) {
     console.error("Update quantity error:", error);
     res.json({
-      statusCode:StatusCodes.INTERNAL_SERVER_ERROR,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       success: false,
       message: "Internal Server Error",
     });
@@ -216,12 +244,14 @@ exports.removeProductFromCart = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const cart = await Cart.findOne({ user: userId })
-      .populate("products.product", "name price description quantity");
+    const cart = await Cart.findOne({ user: userId }).populate(
+      "products.product",
+      "name price description quantity"
+    );
 
     if (!cart) {
       return res.json({
-        statusCode:StatusCodes.NOT_FOUND,
+        statusCode: StatusCodes.NOT_FOUND,
         success: false,
         message: "Cart not found or already deleted.",
       });
@@ -230,7 +260,7 @@ exports.removeProductFromCart = async (req, res) => {
     for (const item of cart.products) {
       const product = await Product.findById(item.product._id);
       if (product) {
-        product.quantity += item.quantity; 
+        product.quantity += item.quantity;
         await product.save();
       }
     }
@@ -239,22 +269,21 @@ exports.removeProductFromCart = async (req, res) => {
     await Cart.deleteOne({ _id: cart._id });
 
     res.json({
-      statusCode:StatusCodes.OK,
+      statusCode: StatusCodes.OK,
       success: true,
       message: "Cart removed successfully and product stock restored.",
       deletedCart: cart,
     });
-
   } catch (error) {
     console.error("Remove cart error:", error);
     res.json({
-      statusCode:StatusCodes.INTERNAL_SERVER_ERROR,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       success: false,
       message: "Internal Server Error",
     });
   }
 };
- 
+
 // GET ALL CARTS ( superadmin / admin / user )
 exports.getAllCarts = async (req, res) => {
   try {
@@ -275,26 +304,30 @@ exports.getAllCarts = async (req, res) => {
       // User sees own cart
       filter.user = requester._id;
     } else {
-      return res.json({ statusCode:StatusCodes.UNAUTHORIZED , success: false, message: "Unauthorized access" });
+      return res.json({
+        statusCode: StatusCodes.UNAUTHORIZED,
+        success: false,
+        message: "Unauthorized access",
+      });
     }
 
     // Fetch carts and populate required fields
     const carts = await Cart.find(filter)
-      .populate("user", "_id name email role") // 
+      .populate("user", "_id name email role") //
       .populate("products.product", "name price");
 
     res.json({
-      statusCode:StatusCodes.OK,
+      statusCode: StatusCodes.OK,
       success: true,
       message: "Carts Fetched Successfully.",
       carts,
     });
   } catch (error) {
     console.error("Get all carts error:", error);
-    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Internal Server Error" });
+    res.json({
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
-
-
-  
-  

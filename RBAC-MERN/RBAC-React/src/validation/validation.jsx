@@ -24,9 +24,12 @@ export const loginValidationSchema = Yup.object({
   email: Yup.string()
     .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address.")
     .required("Email is required."),
-  password: Yup.string()
-    .min(6, "Password must be at least 6 characters.")
-    .required("Password is required."),
+    password: Yup.string()
+    .min(6, "Password must be at least 6 characters long.")
+    .matches(/[a-z]/, "Include at least one lowercase letter.")
+    .matches(/[A-Z]/, "Include at least one uppercase letter.")
+    .matches(/\d/, "Include at least one number.")
+    .required("Please choose a secure password.")
 });
 
 // USER - CREATE / UPDATE

@@ -9,7 +9,7 @@ const { isAdminOrSuperAdmin, canManageUser } = require("../middlewares/rbacMiddl
 router.post("/add", protect , canManageUser, cartController.addProductToCart);
 
 // GET SPECIFIC CART
-router.get("/cart", protect , canManageUser, cartController.getUserCart);
+router.get("/:id", protect, canManageUser, cartController.getUserCart);
 
 // UPDATE CART
 router.put("/update", protect , canManageUser, cartController.updateProductQuantity);

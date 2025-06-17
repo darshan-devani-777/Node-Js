@@ -2,7 +2,7 @@ const User = require("./models/userModel");
 
 const createSuperAdminIfNotExists = async () => {
   const email = "superadmin@example.com";
-  const password = "superadmin123";
+  const password = "Super@123";
   const name = "Super Admin";
 
   try {

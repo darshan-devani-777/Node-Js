@@ -1,30 +1,57 @@
-const Product = require("../models/product.model");
+const Product = require("../models/productModel");
 const { StatusCodes } = require("http-status-codes");
 
 // CREATE PRODUCT (admin / superadmin only)
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, categories, quantity } = req.body;
+    let {
+      name = "",
+      description = "",
+      price,
+      categories,
+      quantity,
+    } = req.body;
 
+    // Step 1: Trim name & description
+    name = name.trim();
+    description = description.trim();
+
+    // Step 2: Parse categories properly
+    if (typeof categories === "string") {
+      try {
+        categories = JSON.parse(categories); 
+      } catch (err) {
+        categories = categories.split(",").map((cat) => cat.trim());
+      }
+    }
+
+    //  Step 3: Create product
     const newProduct = new Product({
       name,
       description,
       price,
+      quantity,
       categories,
-      quantity,   
+      image: req.file ? "/uploads/products/" + req.file.filename : null,
       createdBy: req.user._id,
     });
 
+    // Step 4: Save and return
     const savedProduct = await newProduct.save();
 
     res.json({
-      statusCode:StatusCodes.CREATED,
+      statusCode: 201,
       success: true,
       message: "Product Created Successfully",
       product: savedProduct,
     });
   } catch (err) {
-    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Internal Server Error" });
+    console.error("Product creation error:", err);
+    res.json({
+      statusCode: 500,
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
 
@@ -50,20 +77,49 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-// UPDATE (admin / superadmin only)
+// UPDATE PRODUCT
 exports.updateProduct = async (req, res) => {
   try {
+    const productId = req.params.id;
+
+    const product = await Product.findById(productId);
+    if (!product)
+      return res.status(404).json({ message: "Product not found" });
+
+    // Parse categories from string to array if necessary
+    if (typeof req.body.categories === "string") {
+      try {
+        req.body.categories = JSON.parse(req.body.categories);
+      } catch (err) {
+        req.body.categories = req.body.categories
+          .split(",")
+          .map((cat) => cat.trim());
+      }
+    }
+
+    let imagePath = product.image;
+    if (req.file) {
+      imagePath = `/uploads/products/${req.file.filename}`;
+    }
+
+    const updatedData = {
+      ...req.body,
+      image: imagePath,
+    };
+
     const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body }, 
+      productId,
+      updatedData,
       { new: true }
     ).populate("createdBy", "name email role");
 
-    if (!updatedProduct)
-      return res.status(404).json({ message: "Product not found" });
-
-    res.status(200).json({ success: true, message: "Product Updated Successfully...", product: updatedProduct });
+    res.status(200).json({
+      success: true,
+      message: "Product Updated Successfully...",
+      product: updatedProduct,
+    });
   } catch (err) {
+    console.error("Update Error:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

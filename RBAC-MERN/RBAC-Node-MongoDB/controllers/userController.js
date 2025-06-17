@@ -67,17 +67,22 @@ exports.updateUserById = async (req, res) => {
     const userId = req.params.id;
     const updateData = { ...req.body };
 
+    // Handle role only for superadmin
     if (req.user.role !== "superadmin" && updateData.role) {
       delete updateData.role;
     }
 
-    if (updateData.password) {
+    // Handle password hashing
+    if (updateData.password && updateData.password.trim() !== "") {
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(updateData.password, salt);
-
-      updateData.password = hashedPassword;
+      updateData.password = await bcrypt.hash(updateData.password, salt);
     } else {
       delete updateData.password;
+    }
+
+    // Handle image if uploaded
+    if (req.file) {
+      updateData.image = "uploads/users/" + req.file.filename;
     }
 
     // Update user
@@ -87,7 +92,11 @@ exports.updateUserById = async (req, res) => {
     });
 
     if (!updatedUser) {
-      return res.json({ statusCode:StatusCodes.NOT_FOUND , success:false , message: "User not found" });
+      return res.json({
+        statusCode: StatusCodes.NOT_FOUND,
+        success: false,
+        message: "User not found",
+      });
     }
 
     const userResponse = {
@@ -95,12 +104,22 @@ exports.updateUserById = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
+      image: updatedUser.image, 
     };
 
-    return res.json({ statusCode:StatusCodes.OK , success: true, message:"User Updated Successfully..." , user: userResponse });
+    return res.json({
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "User Updated Successfully...",
+      user: userResponse,
+    });
   } catch (error) {
     console.error("Error updating user:", error);
-    return res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success:false , message: "Server error" });
+    return res.json({
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: "Server error",
+    });
   }
 };
 

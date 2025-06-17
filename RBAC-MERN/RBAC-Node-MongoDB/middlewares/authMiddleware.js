@@ -7,8 +7,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // TOKEN VERIFY
 exports.protect = async (req, res, next) => {
   let token;
-
-  // STEP 1: Log incoming Authorization header
   console.log("Authorization Header:", req.headers.authorization);
 
   if (
@@ -18,24 +16,24 @@ exports.protect = async (req, res, next) => {
     token = req.headers.authorization.split(" ")[1];
   }
 
-  // STEP 2: Log the token
+  // Log the token
   console.log("Extracted Token:", token);
 
   if (!token) {
     console.log("No token found in request.");
     return res.json({
       statusCode: StatusCodes.UNAUTHORIZED,
-      success: flase,
+      success: false,
       message: "Not authorized, no token",
     });
   }
 
   try {
-    // STEP 3: Decode token
+    // Decode token
     const decoded = jwt.verify(token, JWT_SECRET);
     console.log("Decoded JWT:", decoded);
 
-    // STEP 4: Find user by decoded id
+    // Find user by decoded id
     req.user = await User.findById(decoded.id).select("-password");
     console.log("User Found:", req.user);
 

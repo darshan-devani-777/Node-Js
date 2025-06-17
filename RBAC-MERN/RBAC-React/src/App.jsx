@@ -4,9 +4,11 @@ import Header from "./components/header";
 import Register from "./components/register";
 import Login from "./components/login";
 import UserList from "./components/userList";
-import Dashboard from "./components/dashboard";
-import ProductList from "./components/ProductList";
+import Profile from "./components/profile";
+import ProductList from "./components/productList";
 import CartList from "./components/cartList";
+import OrderList from "./components/orderList";
+import Dashboard from "./components/dashboard";
 import { ProtectedRoute, RedirectIfLoggedInRoute } from "./components/protectedroute";
 
 function App() {
@@ -34,6 +36,14 @@ function App() {
           />
 
           {/* Protected routes */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={
@@ -63,6 +73,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CartList />
+              </ProtectedRoute>
+            }
+          />
+            <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <OrderList />
               </ProtectedRoute>
             }
           />

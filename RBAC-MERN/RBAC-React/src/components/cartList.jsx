@@ -6,7 +6,6 @@ export default function CartList() {
   const navigate = useNavigate();
   const [carts, setCarts] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
-  const isAdmin = user?.role === "admin" || user?.role === "superadmin";
 
   useEffect(() => {
     if (!user) {
@@ -19,16 +18,32 @@ export default function CartList() {
   // FETCH CARTS
   const fetchCarts = async () => {
     try {
-      const endpoint = isAdmin ? "/carts/all" : "/carts/cart";
-      const res = await api.get(endpoint);
-      if (isAdmin) {
-        setCarts(res.data.carts || []);
+      let res;
+
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || (!user.id && !user._id)) {
+        console.warn("User not loaded or missing ID");
+        return;
+      }
+
+      if (user.role === "admin" || user.role === "superadmin") {
+        // Admin or superadmin - get all carts
+        res = await api.get("/carts/all");
+
+        const filtered = (res.data.carts || []).filter(
+          (cart) => cart.user?.role === "user"
+        );
+
+        setCarts(filtered);
       } else {
+        // Normal user - fetch their own cart
+        res = await api.get(`/carts/${user.id}`);
+
         setCarts(res.data.cart ? [res.data.cart] : []);
       }
     } catch (err) {
       alert("Error fetching carts");
-      console.error(err);
+      console.error("Fetch Cart Error:", err.response?.data || err.message);
     }
   };
 
@@ -49,15 +64,34 @@ export default function CartList() {
 
   // REMOVE PRODUCT
   const handleRemoveProduct = async (productId) => {
+    const isConfirmed = window.confirm("Are you sure you want to remove this product?");
+    
+    if (isConfirmed) {
+      try {
+        await api.delete(`/carts/remove/${productId}`);
+        fetchCarts();  
+      } catch (err) {
+        alert("Failed to remove product");
+        console.error(err);
+      }
+    } else {
+      console.log("Product removal was canceled.");
+    }
+  };
+  
+
+  // ADD ORDER FOR SELECTED PRODUCT
+  const handleAddOrder = async (productId) => {
     try {
-      await api.delete(`/carts/remove/${productId}`);
-      fetchCarts();
+      await api.post("/orders/create", { productId });
+      alert("Order Added Successfully...!");
     } catch (err) {
-      alert("Failed to remove product");
+      alert("Failed to add order");
       console.error(err);
     }
   };
 
+  // All Product
   const allProducts = carts.flatMap((cart) =>
     (cart?.products || []).map((item) => ({
       ...item,
@@ -137,12 +171,20 @@ export default function CartList() {
                     </td>
                     <td className="px-4 py-2 border border-gray-700 bg-gray-800">
                       {isUserItem ? (
-                        <button
-                          onClick={() => handleRemoveProduct(item.product?._id)}
-                          className="bg-red-600 hover:bg-red-800 text-white px-3 py-1 rounded-md text-sm font-medium shadow-md transition duration-200 cursor-pointer"
-                        >
-                          Remove
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleAddOrder(item.product?._id)}
+                            className="bg-green-600 hover:bg-green-800 text-white px-3 py-1 rounded-md text-sm font-medium shadow-md transition duration-200 cursor-pointer"
+                          >
+                            Add Order
+                          </button>
+                          <button
+                            onClick={() => handleRemoveProduct(item.product?._id)}
+                            className="bg-red-600 hover:bg-red-800 text-white px-3 py-1 rounded-md text-sm font-medium shadow-md transition duration-200 cursor-pointer ml-2"
+                          >
+                            Remove
+                          </button>
+                        </>
                       ) : (
                         <button
                           disabled
