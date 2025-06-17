@@ -125,19 +125,25 @@ exports.updateOrder = async (req, res) => {
         .status(StatusCodes.NOT_FOUND)
         .json({ success: false, message: "Order not found" });
     }
+    const isAdminOrSuperAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
 
-    if (order.user.toString() !== req.user._id.toString()) {
-      return res
-        .status(StatusCodes.FORBIDDEN)
-        .json({ success: false, message: "Not allowed to update this order" });
-    }
-
-    const { products, totalAmount, address, contact } = req.body;
+    const { products, totalAmount, address, contact, paymentStatus, deliveryStatus } = req.body;
 
     order.products = products || order.products;
     order.totalAmount = totalAmount || order.totalAmount;
     order.address = address || order.address;
     order.contact = contact || order.contact;
+
+    if (isAdminOrSuperAdmin) {
+      if (paymentStatus) order.paymentStatus = paymentStatus;
+      if (deliveryStatus) order.deliveryStatus = deliveryStatus;
+    } else {
+      if (paymentStatus || deliveryStatus) {
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .json({ success: false, message: "You are not allowed to update payment or delivery status" });
+      }
+    }
 
     const updatedOrder = await order.save();
     res.status(StatusCodes.OK).json({

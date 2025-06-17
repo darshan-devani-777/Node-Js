@@ -123,9 +123,11 @@ export default function OrderList() {
                       <span
                         className={`px-2 py-1 rounded text-sm font-medium ${
                           order.deliveryStatus === "processing"
-                            ? "bg-yellow-700"
+                            ? "bg-yellow-600"
                             : order.deliveryStatus === "delivered"
                             ? "bg-green-600"
+                            : order.deliveryStatus === "shipped"
+                            ? "bg-gray-600"
                             : "bg-red-600"
                         }`}
                       >
@@ -348,10 +350,23 @@ export default function OrderList() {
                 <div className="space-y-2 text-sm text-gray-300">
                   <p className="py-1">
                     <span className="font-medium text-indigo-400">Status:</span>{" "}
-                    {selectedOrder.deliveryStatus ||
-                      selectedOrder.status ||
-                      "Not Available"}
+                    <span
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        selectedOrder.deliveryStatus === "processing"
+                          ? "bg-yellow-600"
+                          : selectedOrder.deliveryStatus === "delivered"
+                          ? "bg-green-600"
+                          : selectedOrder.deliveryStatus === "shipped"
+                          ? "bg-gray-600"
+                          : "bg-red-600"
+                      }`}
+                    >
+                      {selectedOrder.deliveryStatus ||
+                        selectedOrder.status ||
+                        "Not Available"}
+                    </span>
                   </p>
+
                   <p className="py-1">
                     <span className="font-medium text-indigo-400">
                       Address:
