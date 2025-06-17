@@ -83,7 +83,7 @@ export default function OrderList() {
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100">
-      <h2 className="text-xl font-semibold my-10 underline">Order List</h2>
+      <h2 className="text-xl font-semibold my-7 underline">Order List</h2>
 
       <div className="rounded-md overflow-x-auto">
         <table className="min-w-full text-left bg-gray-800 text-white">
