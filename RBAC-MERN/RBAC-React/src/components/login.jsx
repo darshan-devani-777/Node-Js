@@ -13,9 +13,15 @@ export default function Login() {
       try {
         const res = await api.post("/auth/login", values);
         console.log("Login response", res.data);
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        navigate("/profile");
+        
+        if (res.data && res.data.token && res.data.user) {
+          localStorage.setItem("token", res.data.token);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+
+          navigate("/profile");
+        } else {
+          alert("Please Provide Valid Email OR Password...");
+        }
       } catch (err) {
         alert(err.response?.data?.message || "Login error");
       }
