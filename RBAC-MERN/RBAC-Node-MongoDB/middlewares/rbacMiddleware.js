@@ -2,6 +2,7 @@ const User = require("../models/userModel");
 const mongoose = require("mongoose");
 const { StatusCodes } = require("http-status-codes");
 
+// Role ckeck
 exports.roleMiddleware = (roles) => {
   return (req, res, next) => {
     const userRole = req.user.role; 
