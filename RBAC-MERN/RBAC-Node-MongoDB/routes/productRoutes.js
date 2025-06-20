@@ -27,7 +27,7 @@ router.post(
   productController.createProduct
 );
 
-// 🔹 UPDATE Product
+// UPDATE Product
 router.put(
   "/:id",
   protect,

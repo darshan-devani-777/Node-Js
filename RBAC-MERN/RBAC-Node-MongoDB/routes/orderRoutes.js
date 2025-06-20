@@ -7,22 +7,22 @@ const {
   canManageUser,
 } = require("../middlewares/rbacMiddleware");
 
-// User: Create Order
+// CREATE USER
 router.post("/create", protect, orderController.createOrder);
 
-// Admin/SuperAdmin: Get All Orders
+// GET ALL ORDER
 router.get("/", protect, isAdminOrSuperAdmin, orderController.getAllOrders);
 
-// Get Orders of a Specific User (with permission)
+// GET SPECIFIC USER
 router.get("/specific/:id", protect, canManageUser, orderController.getUserOrders);
 
-// User: Update their own order
+// UPDATE ORDER
 router.put("/update-details/:id", protect, orderController.updateOrderDetails);
 
-// User: Update Status 
+// UPDATE STATUS
 router.put("/update-status/:id", protect, orderController.updateOrderStatus);
 
-// User: Delete their own order
+// DELETE STATUS
 router.delete("/delete/:id", protect, orderController.deleteOrder);
 
 module.exports = router;
