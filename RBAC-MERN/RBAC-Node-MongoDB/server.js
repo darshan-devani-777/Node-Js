@@ -10,6 +10,7 @@ const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const rateReviewRoutes = require("./routes/rateReviewRoutes");
 const dashRoutes = require("./routes/dashRoutes");
 
 const app = express();
@@ -24,6 +25,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/carts", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/reviews", rateReviewRoutes); 
 app.use("/api/dashboard", dashRoutes);
 
 // DATABASE CONNECTION

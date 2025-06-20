@@ -1,4 +1,5 @@
 const Product = require("../models/productModel");
+const RateReview = require("../models/rateReviewModel");
 const { StatusCodes } = require("http-status-codes");
 
 // CREATE PRODUCT (admin / superadmin only)
@@ -12,11 +13,9 @@ exports.createProduct = async (req, res) => {
       quantity,
     } = req.body;
 
-    // Step 1: Trim name & description
     name = name.trim();
     description = description.trim();
 
-    // Step 2: Parse categories properly
     if (typeof categories === "string") {
       try {
         categories = JSON.parse(categories); 
@@ -35,8 +34,6 @@ exports.createProduct = async (req, res) => {
       image: req.file ? "/uploads/products/" + req.file.filename : null,
       createdBy: req.user._id,
     });
-
-    // Step 4: Save and return
     const savedProduct = await newProduct.save();
 
     res.json({
@@ -58,22 +55,76 @@ exports.createProduct = async (req, res) => {
 // GET ALL PRODUCTS (accessible to all)
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("createdBy", "name email role");
-    res.json({ statusCode:StatusCodes.OK , success: true, products });
-  } catch (err) {
-    res.json({ statusCode:StatusCodes.INTERNAL_SERVER_ERROR , success: false, message: "Internal Server Error" });
+    const products = await Product.find();
+
+    const productsWithAvgRating = await Promise.all(
+      products.map(async (product) => {
+        const reviews = await RateReview.find({ product: product._id }).populate("user", "name email");
+    
+        let avgRating = 0;
+        if (reviews.length > 0) {
+          const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+          avgRating = totalRating / reviews.length;
+        }
+    
+        return {
+          ...product.toObject(),
+          avgRating: avgRating.toFixed(1),
+          reviews,
+          createdBy: product.createdBy?.toString() || null 
+        };
+      })
+    );
+    
+    res.status(200).json({
+      success: true,
+      message: "Products Fetched Successfully...",
+      products: productsWithAvgRating,
+    });
+    
+  } catch (error) {
+    console.error(error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "An error occurred while fetching products. Please try again later.",
+      error: error.message,
+    });
   }
 };
 
 // GET SPECIFIC ID (accessible to all)
 exports.getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate("createdBy", "name email role");
-    if (!product) return res.status(404).json({ statusCode:StatusCodes.NOT_FOUND , success:false , message: "Product not found" });
+    const product = await Product.findById(req.params.id)
+      .populate("createdBy", "name email role")
+      .populate({
+        path: "reviews",
+        populate: {
+          path: "user",
+          select: "name _id", 
+        },
+      });
 
-    res.json({ statusCode:StatusCodes.OK , success: true , message: "Product Retrieved Successfully..." , product });
+    if (!product) {
+      return res.status(404).json({
+        statusCode: StatusCodes.NOT_FOUND,
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    res.json({
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Product Retrieved Successfully...",
+      product,
+    });
   } catch (err) {
-    res.json({ statusbar:StatusCodes.INTERNAL_SERVER_ERROR , success:false , message: "Internal Server Error" });
+    res.status(500).json({
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
 

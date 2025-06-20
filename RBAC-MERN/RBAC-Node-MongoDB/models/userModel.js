@@ -14,7 +14,6 @@ const userSchema = new mongoose.Schema(
     image: String,
     contact: {
       phone: { type: String, required: true, trim: true },
-      email: { type: String, required: true, trim: true },
     },
     address: {
       street: { type: String, required: true, trim: true },

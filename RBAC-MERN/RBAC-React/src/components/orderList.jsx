@@ -19,7 +19,7 @@ export default function OrderList() {
       return;
     }
     fetchOrders();
-  }, []);
+  }, [selectedOrder]);
 
   // FETCH ORDER
   const fetchOrders = async () => {
@@ -83,7 +83,7 @@ export default function OrderList() {
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100">
-      <h2 className="text-xl font-semibold my-7 underline">Order List</h2>
+      <h2 className="text-xl font-semibold my-6 underline">Order List</h2>
 
       <div className="rounded-md overflow-x-auto">
         <table className="min-w-full text-left bg-gray-800 text-white">
@@ -412,73 +412,80 @@ export default function OrderList() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6">
                   {selectedOrder.products?.length > 0 ? (
-                    selectedOrder.products.map((item, idx) => {
-                      const imagePath =
-                        item.product?.image || item.productImage;
-                      const imageUrl = imagePath?.startsWith("http")
-                        ? imagePath
-                        : `http://localhost:1212${imagePath}`;
-                      const product = item.product || {};
+                    <div className="overflow-y-auto max-h-[300px]">
+                      {selectedOrder.products.map((item, idx) => {
+                        const imagePath =
+                          item.product?.image || item.productImage;
+                        const imageUrl = imagePath?.startsWith("http")
+                          ? imagePath
+                          : `http://localhost:1212${imagePath}`;
+                        const product = item.product || {};
 
-                      return (
-                        <div
-                          key={idx}
-                          className="flex gap-4 bg-gray-900 rounded-xl p-5 border border-gray-700"
-                        >
-                          <div className="w-1/3 h-60 rounded-lg overflow-hidden border border-gray-600 flex-shrink-0 bg-white">
-                            <img
-                              src={imageUrl}
-                              alt={product.name || "Product"}
-                              className="w-full h-full object-contain transition-transform duration-300 hover:scale-110 cursor-pointer"
-                              onError={(e) => (e.target.src = "/no-image.png")}
-                            />
-                          </div>
-                          <div className="flex flex-col justify-between text-white w-2/3">
-                            <div>
-                              <p className="text-lg font-bold text-indigo-200 mb-2">
-                                {product.name || "Unnamed Product"}
-                              </p>
-                              {product.description && (
+                        return (
+                          <div
+                            key={idx}
+                            className="flex gap-6 bg-gray-900 rounded-xl p-5 border border-gray-700"
+                          >
+                            {/* Left side - Image */}
+                            <div className="w-1/2 h-60 rounded-lg overflow-hidden border border-gray-600 flex-shrink-0 bg-white">
+                              <img
+                                src={imageUrl}
+                                alt={product.name || "Product"}
+                                className="w-full h-full object-contain transition-transform duration-300 hover:scale-110 cursor-pointer"
+                                onError={(e) =>
+                                  (e.target.src = "/no-image.png")
+                                }
+                              />
+                            </div>
+
+                            {/* Right side - Product Details */}
+                            <div className="flex flex-col justify-between text-white w-2/3">
+                              <div>
+                                <p className="text-lg font-bold text-indigo-200 mb-2">
+                                  {product.name || "Unnamed Product"}
+                                </p>
+                                {product.description && (
+                                  <p className="text-sm text-gray-300 mb-1">
+                                    <span className="font-medium text-indigo-400">
+                                      Description:
+                                    </span>{" "}
+                                    {product.description}
+                                  </p>
+                                )}
                                 <p className="text-sm text-gray-300 mb-1">
                                   <span className="font-medium text-indigo-400">
-                                    Description:
+                                    Categories:
                                   </span>{" "}
-                                  {product.description}
+                                  {product.categories?.join(", ") || "N/A"}
                                 </p>
-                              )}
-                              <p className="text-sm text-gray-300 mb-1">
-                                <span className="font-medium text-indigo-400">
-                                  Categories:
-                                </span>{" "}
-                                {product.categories?.join(", ") || "N/A"}
-                              </p>
-                            </div>
-                            <div className="mt-3 space-y-1">
-                              <p className="text-sm text-gray-300">
-                                <span className="font-medium text-indigo-400">
-                                  Price:
-                                </span>{" "}
-                                ₹{product.price?.toFixed(2) || "0.00"}
-                              </p>
-                              <p className="text-sm text-gray-300">
-                                <span className="font-medium text-indigo-400">
-                                  Quantity:
-                                </span>{" "}
-                                {item.quantity}
-                              </p>
-                              <p className="text-md mt-2 text-green-400 font-semibold">
-                                Total: ₹
-                                {(item.quantity * (product.price || 0)).toFixed(
-                                  2
-                                )}
-                              </p>
+                              </div>
+                              <div className="mt-3 space-y-1">
+                                <p className="text-sm text-gray-300">
+                                  <span className="font-medium text-indigo-400">
+                                    Price:
+                                  </span>{" "}
+                                  ₹{product.price?.toFixed(2) || "0.00"}
+                                </p>
+                                <p className="text-sm text-gray-300">
+                                  <span className="font-medium text-indigo-400">
+                                    Quantity:
+                                  </span>{" "}
+                                  {item.quantity}
+                                </p>
+                                <p className="text-md mt-2 text-green-400 font-semibold">
+                                  Total: ₹
+                                  {(
+                                    item.quantity * (product.price || 0)
+                                  ).toFixed(2)}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })
+                        );
+                      })}
+                    </div>
                   ) : (
                     <div className="col-span-2 text-center text-gray-400">
                       No product details available for this order.
@@ -493,26 +500,36 @@ export default function OrderList() {
                 <button
                   onClick={async () => {
                     try {
+                      console.log(
+                        "Selected Order before update:",
+                        selectedOrder
+                      );
+
                       const updatedTotalAmount = selectedOrder.products?.reduce(
                         (total, product) =>
                           total +
-                          (product.quantity * product.product?.price || 0),
+                          product.quantity * (product.product?.price || 0),
                         0
                       );
 
                       const updatedOrder = {
                         ...selectedOrder,
                         totalAmount: updatedTotalAmount,
+                        products: selectedOrder.products,
                       };
 
-                      await axios.put(
-                        `http://localhost:1212/api/orders/update/${selectedOrder._id}`,
+                      console.log("Updated Order:", updatedOrder);
+
+                      const response = await axios.put(
+                        `http://localhost:1212/api/orders/update-details/${selectedOrder._id}`,
                         updatedOrder,
                         {
                           headers: { Authorization: `Bearer ${token}` },
                         }
                       );
 
+                      console.log("Response from server:", response.data);
+                      setSelectedOrder(response.data.data);
                       fetchOrders();
                       closeModal();
                     } catch (err) {
@@ -528,7 +545,7 @@ export default function OrderList() {
 
               <button
                 onClick={closeModal}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg cursor-pointer mt-6"
+                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg cursor-pointer"
               >
                 {isEditing ? "Cancel" : "Close"}
               </button>

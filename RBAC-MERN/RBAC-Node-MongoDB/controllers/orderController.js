@@ -1,7 +1,9 @@
 const User = require("../models/userModel");
+const Product = require("../models/productModel");
 const Cart = require("../models/cartModel");
 const Order = require("../models/orderModel");
 const { StatusCodes } = require("http-status-codes");
+const mongoose = require("mongoose");
 
 // CREATE ORDER - ONLY USER
 exports.createOrder = async (req, res) => {
@@ -116,7 +118,7 @@ exports.getUserOrders = async (req, res) => {
 };
 
 // UPDATE ORDER (user only)
-exports.updateOrder = async (req, res) => {
+exports.updateOrderDetails = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
 
@@ -125,37 +127,129 @@ exports.updateOrder = async (req, res) => {
         .status(StatusCodes.NOT_FOUND)
         .json({ success: false, message: "Order not found" });
     }
-    const isAdminOrSuperAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
 
-    const { products, totalAmount, address, contact, paymentStatus, deliveryStatus } = req.body;
+    const isAdminOrSuperAdmin =
+      req.user.role === "admin" || req.user.role === "superadmin";
+    const isOwner = order.user.toString() === req.user.id;
 
-    order.products = products || order.products;
-    order.totalAmount = totalAmount || order.totalAmount;
-    order.address = address || order.address;
-    order.contact = contact || order.contact;
+    // If not owner and not admin/superadmin -> reject
+    if (!isAdminOrSuperAdmin && !isOwner) {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        message: "You are not allowed to update this order",
+      });
+    }
 
-    if (isAdminOrSuperAdmin) {
-      if (paymentStatus) order.paymentStatus = paymentStatus;
-      if (deliveryStatus) order.deliveryStatus = deliveryStatus;
-    } else {
-      if (paymentStatus || deliveryStatus) {
-        return res
-          .status(StatusCodes.FORBIDDEN)
-          .json({ success: false, message: "You are not allowed to update payment or delivery status" });
+    const { products, address, contact } = req.body;
+
+    let newTotalAmount = 0;
+
+    if (isOwner || isAdminOrSuperAdmin) {
+      if (products) {
+        const mongoose = require("mongoose");
+
+        for (const updatedProduct of products) {
+          console.log("Product from request:", updatedProduct._id);
+
+          const existingProduct = order.products.find(
+            (product) =>
+              product.product.toString() ===
+              new mongoose.Types.ObjectId(updatedProduct._id).toString()
+          );
+
+          if (existingProduct) {
+            console.log(
+              `Found product: ${existingProduct.product} with quantity: ${existingProduct.quantity}`
+            );
+            console.log(
+              `Updating quantity for product ${existingProduct.product} to ${updatedProduct.quantity}`
+            );
+
+            // Update the quantity
+            existingProduct.quantity = updatedProduct.quantity;
+
+            const product = await Product.findById(updatedProduct._id);
+
+            if (product && product.price && !isNaN(product.price)) {
+              // Recalculate totalAmount
+              newTotalAmount += updatedProduct.quantity * product.price;
+            } else {
+              console.error(
+                `Price not found or invalid for product ${updatedProduct._id}`
+              );
+            }
+          } else {
+            console.log(`Product ${updatedProduct._id} not found in order.`);
+          }
+        }
       }
+
+      // Ensure totalAmount is updated with the new total or preserved if unchanged
+      order.totalAmount = newTotalAmount || order.totalAmount;
+      order.address = address || order.address;
+      order.contact = contact || order.contact;
     }
 
     const updatedOrder = await order.save();
+
+    console.log("Updated order:", updatedOrder);
+
     res.status(StatusCodes.OK).json({
       success: true,
       message: "Order Updated Successfully",
       data: updatedOrder,
     });
   } catch (error) {
-    console.error("Update Order Error:", error);
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: "Server Error" });
+    console.error("Update Order Details Error:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+// UPDATE ORDER STATUS (SuperAdmin / Admin)
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    const isAdminOrSuperAdmin =
+      req.user.role === "admin" || req.user.role === "superadmin";
+
+    // Only admins or superadmins can update payment or delivery status
+    if (!isAdminOrSuperAdmin) {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        message: "You are not authorized to update payment or delivery status",
+      });
+    }
+
+    const { paymentStatus, deliveryStatus } = req.body;
+
+    if (paymentStatus) order.paymentStatus = paymentStatus;
+    if (deliveryStatus) order.deliveryStatus = deliveryStatus;
+
+    const updatedOrder = await order.save();
+
+    console.log("Updated order status:", updatedOrder);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Order status updated successfully",
+      data: updatedOrder,
+    });
+  } catch (error) {
+    console.error("Update Order Status Error:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Server Error",
+    });
   }
 };
 

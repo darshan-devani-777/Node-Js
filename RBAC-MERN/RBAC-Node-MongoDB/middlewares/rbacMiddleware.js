@@ -2,6 +2,17 @@ const User = require("../models/userModel");
 const mongoose = require("mongoose");
 const { StatusCodes } = require("http-status-codes");
 
+exports.roleMiddleware = (roles) => {
+  return (req, res, next) => {
+    const userRole = req.user.role; 
+
+    if (!roles.includes(userRole)) {
+      return res.status(403).json({ message: "Access denied..!" });
+    }
+    next();
+  };
+};
+
 // Middleware to check if user is SuperAdmin
 exports.isSuperAdmin = (req, res, next) => {
   if (req.user.role !== "superadmin") {
@@ -98,3 +109,4 @@ exports.canManageUser = async (req, res, next) => {
     return res.json({ stausCode:StatusCodes.INTERNAL_SERVER_ERROR , success:false , message: "Server error" });
   }
 };
+

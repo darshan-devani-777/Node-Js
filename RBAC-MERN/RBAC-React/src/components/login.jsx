@@ -20,7 +20,7 @@ export default function Login() {
 
           navigate("/profile");
         } else {
-          alert("Please Provide Valid Email OR Password...");
+          alert("Please Provide Valid Email OR password...");
         }
       } catch (err) {
         alert(err.response?.data?.message || "Login error");
@@ -29,7 +29,7 @@ export default function Login() {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100">
       <div className="w-full max-w-md bg-gray-900 p-8 rounded-xl shadow-lg">
         <h2 className="text-2xl font-bold mb-6 text-center text-white underline">Login</h2>
   

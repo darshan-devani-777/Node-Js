@@ -2,21 +2,22 @@ import * as Yup from "yup";
 
 // REGISTER 
 export const registerValidationSchema = Yup.object({
-  name: Yup.string()
-    .required("Please enter your full name."),
+  name: Yup.string().required("Name is required"),
+  email: Yup.string().email("Invalid email format").required("Email is required"),
+  password: Yup.string().min(6, "Password should be at least 6 characters").required("Password is required"),
 
-    email: Yup.string()
-    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address.")
-    .required("Email is required."),  
+  role: Yup.string().required("Role is required"),
 
-  password: Yup.string()
-    .min(6, "Password must be at least 6 characters long.")
-    .matches(/[a-z]/, "Include at least one lowercase letter.")
-    .matches(/[A-Z]/, "Include at least one uppercase letter.")
-    .matches(/\d/, "Include at least one number.")
-    .required("Please choose a secure password."),
+  contact: Yup.object({
+    phone: Yup.string().required("Phone number is required"),
+  }),
 
-  role: Yup.string().required("Please select a role."),
+  address: Yup.object({
+    street: Yup.string().required("Street is required"),
+    city: Yup.string().required("City is required"),
+    state: Yup.string().required("State is required"),
+    country: Yup.string().required("Country is required"),
+  }),
 });
 
 // LOGIN 

@@ -17,7 +17,10 @@ router.get("/", protect, isAdminOrSuperAdmin, orderController.getAllOrders);
 router.get("/specific/:id", protect, canManageUser, orderController.getUserOrders);
 
 // User: Update their own order
-router.put("/update/:id", protect, orderController.updateOrder);
+router.put("/update-details/:id", protect, orderController.updateOrderDetails);
+
+// User: Update Status 
+router.put("/update-status/:id", protect, orderController.updateOrderStatus);
 
 // User: Delete their own order
 router.delete("/delete/:id", protect, orderController.deleteOrder);

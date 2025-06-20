@@ -95,11 +95,13 @@ export default function UserList() {
 
   // DELETE USER
   const handleDelete = async (id) => {
-    const isConfirmed = window.confirm("Are you sure you want to delete this user?");    
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this user?"
+    );
     if (isConfirmed) {
       try {
         await api.delete(`/users/${id}`);
-        fetchUsers(); 
+        fetchUsers();
       } catch (err) {
         alert("Delete failed");
         console.error(err);
@@ -108,8 +110,8 @@ export default function UserList() {
       console.log("Delete operation was canceled.");
     }
   };
-  
-// SEARCH USER
+
+  // SEARCH USER
   const filteredUsers = users.filter((user) => {
     const search = searchTerm.toLowerCase();
     return (
@@ -121,22 +123,6 @@ export default function UserList() {
 
   return (
     <div className="min-h-screen mx-auto p-6 text-white bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100">
-      {!formVisible && isAdmin && (
-        <div className="text-right">
-          <button
-            className="bg-green-600 hover:bg-green-800 text-white px-3 py-1 rounded transition cursor-pointer"
-            onClick={() => {
-              setFormVisible(true);
-              setEditing(null);
-              formik.resetForm();
-              setImageFile(null);
-            }}
-          >
-            + Add User
-          </button>
-        </div>
-      )}
-
       {formVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <form
@@ -333,20 +319,40 @@ export default function UserList() {
         <input
           type="text"
           placeholder="🔍  Search by name, email, or role..."
-          className="w-full max-w-md p-2 rounded border border-gray-400 bg-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+          className="w-full max-w-md p-2 mt-2 rounded border border-gray-400 bg-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <h3 className="text-xl font-semibold mb-6 text-black underline">
-        User List
-      </h3>
+      <div className="flex justify-between items-center my-6">
+        <h2 className="text-xl font-semibold text-center text-black underline">
+          User List
+        </h2>
+
+        {/* Conditionally render the Add User button */}
+        {!formVisible && isAdmin && (
+          <button
+            className="bg-green-600 hover:bg-green-800 text-white px-3 py-1 rounded transition cursor-pointer"
+            onClick={() => {
+              setFormVisible(true);
+              setEditing(null);
+              formik.resetForm();
+              setImageFile(null);
+            }}
+          >
+            + Add User
+          </button>
+        )}
+      </div>
+
       <div className="overflow-x-auto rounded-md">
         <table className="min-w-full bg-gradient-to-r from-gray-800 via-gray-700 to-gray-600 border border-gray-700 rounded">
           <thead>
             <tr className="bg-gray-00 text-left text-white">
-              <th className="px-4 py-2 border-b border-r border-gray-600">ID</th>
+              <th className="px-4 py-2 border-b border-r border-gray-600">
+                ID
+              </th>
               <th className="px-4 py-2 border-b border-r border-gray-600">
                 Image
               </th>
