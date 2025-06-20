@@ -1,5 +1,4 @@
 const multer = require("multer");
-// const path = require("path");
 
 // Reusable storage config
 const storage = multer.diskStorage({
