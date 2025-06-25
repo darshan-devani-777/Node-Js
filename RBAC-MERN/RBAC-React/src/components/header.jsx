@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { ProtectedRoute, RedirectIfLoggedInRoute } from "./protectedroute";
 import Profile from "./profile";
 import Dashboard from "./dashboard";
 import Users from "./userList";
@@ -30,8 +31,6 @@ export default function Header() {
     localStorage.removeItem("user");
     navigate("/login");
   };
-
-  const isLoggedIn = !!token;
   const currentPath = location.pathname;
 
   const linkClass = (path) =>
@@ -147,14 +146,72 @@ export default function Header() {
         }`}
       >
         <Routes>
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/carts" element={<Carts />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <ProtectedRoute>
+                <Products />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/carts"
+            element={
+              <ProtectedRoute>
+                <Carts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <Orders />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Unprotected Routes with Redirect */}
+          <Route
+            path="/login"
+            element={
+              <RedirectIfLoggedInRoute>
+                <Login />
+              </RedirectIfLoggedInRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <RedirectIfLoggedInRoute>
+                <Register />
+              </RedirectIfLoggedInRoute>
+            }
+          />
         </Routes>
       </div>
     </div>
