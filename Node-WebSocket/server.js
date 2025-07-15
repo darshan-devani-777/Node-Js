@@ -132,6 +132,6 @@ wss.on("connection", (ws, req) => {
   });
 });
 
-server.listen(7777, () => {
-  console.log("🚀 Server running at http://localhost:7777");
+server.listen(3333, () => {
+  console.log("🚀 Server running at http://localhost:3333");
 });

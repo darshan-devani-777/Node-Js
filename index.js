@@ -537,3 +537,16 @@
         // Step 9: Run Node.js server
         // node src/server.js
         
+// Nest.Js :- NodeJS framework
+         // - Building efficient / scalable / high-grade architecture backend / server-side app
+         
+// Key-features :- Typescript support - strongly check typescript
+              // - Modular architecture - organize code in modules / reusable
+              // - Dependency injection - Create own dependencies out of class / use when need
+              // - Asynchrnous programming - Non-blocking manner         
+              // - Powerful CLI - Project setup / code generation
+              // - Decorators - Create Controller / Routes / Middleware to handle easily readable
+              // - Interceptor - Handle req / res object - cross origin methods
+              // - Pipes - Manage Input validation data
+              // - Gaurds - Authorization process - Access control
+              // - Testing - Write unit test / end-to-end testing easily
