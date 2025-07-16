@@ -543,10 +543,14 @@
 // Key-features :- Typescript support - strongly check typescript
               // - Modular architecture - organize code in modules / reusable
               // - Dependency injection - Create own dependencies out of class / use when need
-              // - Asynchrnous programming - Non-blocking manner         
+              // - Asynchronous programming - Non-blocking manner         
               // - Powerful CLI - Project setup / code generation
-              // - Decorators - Create Controller / Routes / Middleware to handle easily readable
+
+// Topics :-  // - Decorators - Create Controller / Routes / Middleware to handle easily readable
               // - Interceptor - Handle req / res object - cross origin methods
+              // - Exception Filters - Privide user friendly error response
+              // - Modules - root module - starting point of nest - application graph like internal structure
+              // - Providers - Services / Helpers / Factories / Repositories
               // - Pipes - Manage Input validation data
               // - Gaurds - Authorization process - Access control
               // - Testing - Write unit test / end-to-end testing easily
