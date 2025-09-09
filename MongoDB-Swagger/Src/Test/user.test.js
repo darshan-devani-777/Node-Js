@@ -11,9 +11,12 @@ describe('User API', () => {
                 email: 'testuser@example.com',
                 password: 'password123'
             });
+    
+        console.log('Create User Response:', res.body); 
         expect(res.statusCode).toEqual(201);
         expect(res.body).toHaveProperty('_id');
     });
+    
 
     // GET ALL USER
     it('should fetch all users', async () => {
