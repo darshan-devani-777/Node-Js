@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const CODES = require("../constants/responseCode");
+const CODES = require("../response/responseCode");
 const buildResponse = require("../helpers/response");
 
 // Get All User
