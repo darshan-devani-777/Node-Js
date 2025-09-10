@@ -1,6 +1,6 @@
 const User = require("../models/User");
-const CODES = require("../constants/responseCodes");
-const buildResponse = require("../helpers/responseBuilder");
+const CODES = require("../constants/responseCode");
+const buildResponse = require("../helpers/response");
 
 // Get All User
 exports.getUsers = async () => {
