@@ -12,6 +12,60 @@ exports.getUsers = async () => {
   }
 };
 
+// Get ALl User (Cursor-based Pagination)
+exports.getUsersPaginated = async ({ first = 10, after, last, before }) => {
+  try {
+    const limit = Math.min(first || last || 10, 100);
+    const query = {};
+
+    if (after) {
+      query._id = { $gt: after };
+    } else if (before) {
+      query._id = { $lt: before };
+    }
+
+    const users = await User.find(query)
+      .select("-password")
+      .sort({ _id: 1 })
+      .limit(limit + 1);
+
+    const hasNextPage = users.length > limit;
+    if (hasNextPage) users.pop();
+
+    const edges = users.map((u) => ({
+      node: { id: u._id.toString(), name: u.name, email: u.email },
+      cursor: u._id.toString()
+    }));
+
+    const totalCount = await User.countDocuments();
+
+    const connection = {
+      edges,
+      pageInfo: {
+        hasNextPage,
+        hasPreviousPage: Boolean(after),
+        startCursor: edges[0]?.cursor || null,
+        endCursor: edges[edges.length - 1]?.cursor || null,
+      },
+      totalCount,
+    };
+
+    return buildResponse(
+     "SUCCESS", CODES.SUCCESS.USERS_FETCHED,
+      "Users fetched successfully...",
+      connection
+    );
+
+  } catch (err) {
+    return buildResponse(
+      "error",
+      "500",
+      err.message || "Failed to fetch users",
+      null
+    );
+  }
+};
+
 // Get User By Id
 exports.getUserById = async (id) => {
   try {

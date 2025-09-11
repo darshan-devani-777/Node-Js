@@ -16,9 +16,29 @@ const typeDefs = gql`
 
   scalar JSON
 
+  """Cursor-based pagination"""
+  type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String
+    endCursor: String
+  }
+
+  type UserEdge {
+    node: User!
+    cursor: String!
+  }
+
+  type UserConnection {
+    edges: [UserEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
+
   type Query {
     users: Response
     user(id: ID!): Response
+    usersConnection(first: Int, after: String, last: Int, before: String): Response
   }
 
   type Mutation {
