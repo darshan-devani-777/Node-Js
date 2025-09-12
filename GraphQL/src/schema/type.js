@@ -5,6 +5,7 @@ const typeDefs = gql`
     id: ID!
     name: String!
     email: String!
+    role: String!
   }
 
   type Response {
@@ -16,7 +17,7 @@ const typeDefs = gql`
 
   scalar JSON
 
-  """Cursor-based pagination"""
+  "Cursor-based pagination"
   type PageInfo {
     hasNextPage: Boolean!
     hasPreviousPage: Boolean!
@@ -42,11 +43,16 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    register(name: String!, email: String!, password: String!): Response
+    register(name: String!, email: String!, password: String!, role: String): Response
     login(email: String!, password: String!): Response
 
-    updateUser(id: ID!, name: String, email: String): Response
-    deleteUser(id: ID!): Response
+  # Self-service mutations
+    updateUser(name: String, email: String): Response
+    deleteUser: Response
+
+  # Admin-only mutations
+    updateUserRole(id: ID!, role: String!): Response
+    deleteUserByAdmin(id: ID!): Response
   }
 `;
 

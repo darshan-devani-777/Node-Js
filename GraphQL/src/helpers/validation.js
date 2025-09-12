@@ -22,10 +22,19 @@ const validateName = (name) => {
   return name.trim();
 };
 
+const validateRole = (role) => {
+  const validRoles = ['user', 'admin'];
+  if (!role || !validRoles.includes(role.toLowerCase())) {
+    throw new UserInputError("Role must be either 'user' or 'admin'");
+  }
+  return role.toLowerCase();
+};
+
 module.exports = {
   validateEmail,
   validatePassword,
   validateName,
+  validateRole,
 };
 
 
