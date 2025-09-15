@@ -17,8 +17,10 @@ const startServer = async () => {
 
   connectDB();
 
-  // Security middlewares
-  app.use(helmet());
+  // Security middleware
+  app.use(helmet({
+    contentSecurityPolicy: false, 
+  }));
   app.use(cors());
   app.use(hpp());
   app.use(mongoSanitize());
@@ -42,6 +44,7 @@ const startServer = async () => {
     typeDefs,
     resolvers,
     context: ({ req }) => ({ req }),
+    introspection: true,
   });
 
   await server.start();
