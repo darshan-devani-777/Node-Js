@@ -1,6 +1,17 @@
 version: '3.8'
 
 services:
+  api-gateway:
+    build: ./api-gateway
+    container_name: api_gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - product-service
+    networks:
+      - microservices-network
+      
   user-service:
     build: ./user-service
     container_name: user_service
