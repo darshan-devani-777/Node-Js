@@ -1,3 +1,6 @@
+Create database employee_management;
+Use employee_management;
+
 CREATE TABLE employee(
 employee_id serial primary key,
 first_name varchar(255) unique not null,
@@ -5,6 +8,22 @@ last_name varchar (255) not null,
 age int ,
 gender varchar (255)
 );
+
+CREATE TABLE employee_salary(
+employee_id int primary key,
+salary int not null,
+foreign key (employee_id) references employee(employee_id)
+);
+
+INSERT INTO employee(first_name, last_name, age, gender)
+VALUES('John', 'Doe', 30, 'Male'),
+('Jane', 'Smith', 25, 'Female'),
+('Jim', 'Beam', 40, 'Male');
+
+INSERT INTO employee_salary(employee_id, salary)
+VALUES(1, 50000),
+(2, 60000),
+(3, 70000);
 
 SELECT * FROM employee;
 SELECT * FROM employee_salary;
