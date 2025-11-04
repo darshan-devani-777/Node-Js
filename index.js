@@ -536,6 +536,8 @@
         
         // Step 9: Run Node.js server
         // node src/server.js
+
+    // Required Packages :- express , prisma , @prisma/client , dotenv    
         
 // Nest.Js :- NodeJS framework
          // - Building efficient / scalable / high-grade architecture backend / server-side app
@@ -554,3 +556,60 @@
               // - Pipes - Manage Input validation data
               // - Gaurds - Authorization process - Access control
               // - Testing - Write unit test / end-to-end testing easily
+
+// Key Points – Node Advanced Concepts
+
+// 1. Performance & Scalability
+
+// Gained an overview of Cluster module to utilize multiple CPU cores using worker threads
+// Integrated Fork method to automatically recreate workers after crashes or disconnections
+// Used a process manager (PM2) to manage, scale, and monitor Node.js processes efficiently
+// Implemented load balancing between worker threads to distribute requests evenly
+// Learned about Worker Threads API for running CPU-intensive tasks in parallel
+// Explored Event Loop phases and how to optimize asynchronous operations for better performance
+
+// 2. CI/CD & Deployment
+
+// Understood CI/CD pipeline concepts for continuous integration and deployment
+// Implemented automated pipelines using tools like GitHub Actions / Jenkins / GitLab CI
+// Configured automated testing, linting, and build processes before deployment
+// Set up staging and production environments for deployment consistency
+// Used Docker and Docker Compose for containerized application builds
+// Deployed services on cloud platforms (AWS / Azure / GCP) or container orchestration tools (Kubernetes)
+
+// 3. Microservices Architecture
+
+// Gained an overview of Microservices and their modular benefits in Node.js
+// Built separate User and Product APIs with distinct endpoints
+// Hosted microservices on different ports for isolated execution
+// Created Dockerfiles for each service defining dependencies and exposed ports
+// Configured a Docker-compose.yml file to connect multiple services via networks
+// Implemented inter-service communication using REST or message queues (RabbitMQ, Kafka)
+// Added API versioning and documentation (Swagger / OpenAPI)
+
+// 4. API Gateway & Proxy Management
+
+// Learned about API Gateway architecture to route and manage multiple microservices
+// Used http-proxy middleware to forward client requests to appropriate service routes and ports
+// Implemented centralized routing and error handling via the API Gateway
+// Added rate limiting, authentication, and logging middleware in the API Gateway
+// Tested and verified endpoints through the unified Gateway server
+
+// 5. Advanced Node.js Features
+
+// Explored Streams for efficient handling of large data transfers
+
+// Implemented Buffer and File System (fs) operations for optimized I/O handling
+// Used EventEmitter for custom event-driven programming
+// Applied child_process module for spawning and managing subprocesses
+// Learned about global error handling using process events (uncaughtException, unhandledRejection)
+// Implemented JWT-based authentication for secure API communication
+// Applied environment variables and configuration management using .env files
+
+// 6. Monitoring, Testing & Optimization
+
+// Monitored applications using PM2 dashboard and Node.js performance hooks
+// Integrated logging frameworks like Winston / Morgan for structured logs
+// Implemented unit and integration tests using Mocha / Jest / Supertest
+// Measured API response times and memory usage
+// Used profiling tools (Node Inspector / Chrome DevTools) to debug performance issues
