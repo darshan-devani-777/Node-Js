@@ -28,6 +28,110 @@ VALUES(1, 50000),
 SELECT * FROM employee;
 SELECT * FROM employee_salary;
 
+-- Alter table
+ALTER TABLE employee
+ADD COLUMN department VARCHAR(255);
+
+-- Update table
+UPDATE employee
+SET department = 'HR'
+WHERE employee_id = 1;
+
+UPDATE employee
+SET department = 'IT'
+WHERE employee_id = 2;
+
+UPDATE employee
+SET department = 'Finance'
+WHERE employee_id = 3;
+
+-- Drop column
+ALTER TABLE employee
+DROP COLUMN department;
+
+-- Delete row
+DELETE FROM employee
+WHERE employee_id = 3;
+
+-- Delete all rows
+DELETE FROM employee;
+
+-- Drop table
+DROP TABLE employee;
+
+-- Join tables
+SELECT e.employee_id, e.first_name, e.last_name, es.salary
+FROM employee e
+JOIN employee_salary es
+ON e.employee_id = es.employee_id;
+
+-- Aggregate Functions
+-- Count rows
+SELECT COUNT(*) AS total_employees
+FROM employee;
+
+-- Average salary
+SELECT AVG(salary) AS average_salary
+FROM employee_salary;
+
+-- Max salary
+SELECT MAX(salary) AS highest_salary
+FROM employee_salary;
+
+-- Min salary
+SELECT MIN(salary) AS lowest_salary
+FROM employee_salary;
+
+-- Sum of salaries
+SELECT SUM(salary) AS total_salary
+FROM employee_salary;
+
+-- Filter rows
+SELECT * FROM employee
+WHERE age > 30;
+
+-- Sorting rows
+SELECT * FROM employee
+ORDER BY age DESC;
+
+-- Limit rows
+SELECT * FROM employee
+LIMIT 2;
+
+-- Group by
+SELECT department, COUNT(*) AS total_employees
+FROM employee
+GROUP BY department;
+
+-- Having
+SELECT department, COUNT(*) AS total_employees
+FROM employee
+GROUP BY department
+HAVING COUNT(*) > 1;
+
+-- UNION (removes duplicates)
+SELECT first_name, last_name
+FROM employee
+UNION
+SELECT first_name, last_name
+FROM employee;
+
+
+-- UNION ALL (keeps duplicates)
+SELECT first_name, last_name
+FROM employee
+UNION ALL
+SELECT first_name, last_name
+FROM employee;
+
+-- INTERSECT (returns common rows)
+SELECT employee_id 
+FROM employee
+INTERSECT
+SELECT employee_id
+FROM employee_salary;
+
+-- Index
 SELECT 
     tablename, 
     indexname, 
@@ -90,8 +194,8 @@ SELECT REPLACE('Hello World', 'World', 'PostgreSQL') AS replaced_string;
 SELECT 
     employee_id,
     salary,
-    IF(salary > 75000, 'High',
-        IF(salary BETWEEN 70000 AND 75000, 'Medium', 'Low')
+    IF(salary >= 70000, 'High',
+        IF(salary BETWEEN 60000 AND 69000, 'Medium', 'Low')
     ) AS salary_category
 FROM employee_salary;
 
@@ -100,8 +204,8 @@ SELECT
     employee_id,
     salary,
     CASE 
-        WHEN salary > 75000 THEN 'High'
-        WHEN salary BETWEEN 70000 AND 75000 THEN 'Medium'
+        WHEN salary >= 70000 THEN 'High'
+        WHEN salary BETWEEN 60000 AND 69000 THEN 'Medium'
         ELSE 'Low'
     END AS salary_category
 FROM employee_salary;
@@ -160,133 +264,110 @@ end;
 $$;
 
 -- Transactions
-BEGIN;
-    UPDATE employee_salary
-        SET salary = salary - 5000
-        WHERE 
-        employee_id = 1;   
+SET autocommit = 0;
+START TRANSACTION;
 
-    SELECT employee_id, first_name, salary
-        FROM employee_salary;
-    UPDATE employee_salary
-        SET salary = salary + 5000
-        WHERE 
-        employee_id = 2;
+UPDATE employee_salary
+SET salary = salary + 5000
+WHERE employee_id = 1;
+
+UPDATE employee_salary
+SET salary = salary - 5000
+WHERE employee_id = 2;
+
 COMMIT;
 
-SELECT employee_id, first_name, salary
-    FROM employee_salary;
+-- Final output after COMMIT
+SELECT e.employee_id, e.first_name, es.salary
+FROM employee_salary es
+JOIN employee e ON es.employee_id = e.employee_id;
 
 -- Rollback
-BEGIN;
-    DELETE FROM employee_salary
-        WHERE 
-        employee_id = 1;     
-    SELECT employee_id, first_name, salary
-        FROM employee_salary;      
+START TRANSACTION;
+
+UPDATE employee_salary
+SET salary = salary - 5000
+WHERE employee_id = 1;
+
+UPDATE employee_salary
+SET salary = salary + 5000
+WHERE employee_id = 2;
+
+-- Temporary values (before rollback)
+SELECT e.employee_id, e.first_name, es.salary
+FROM employee_salary es
+JOIN employee e ON es.employee_id = e.employee_id;
+
 ROLLBACK;
-SELECT employee_id, first_name, salary
-    FROM employee_salary;
+
+-- Final output after ROLLBACK (Original values restored)
+SELECT e.employee_id, e.first_name, es.salary
+FROM employee_salary es
+JOIN employee e ON es.employee_id = e.employee_id;
 
 -- Create Procedure
-create or replace procedure transfer(
-   sender int,
-   receiver int, 
-   amount dec
+DELIMITER $$
+
+CREATE PROCEDURE transfer_amount(
+   IN sender INT,
+   IN receiver INT,
+   IN amount DECIMAL(10,2)
 )
-language plpgsql    
-as $$
-begin
-    -- subtracting the amount from the sender's account 
-    update employee_salary 
-    set salary = salary - amount 
-    where employee_id = sender;
+BEGIN
+    START TRANSACTION;
 
-    -- adding the amount to the receiver's account
-    update employee_salary 
-    set salary = salary + amount 
-    where employee_id = receiver;
+    UPDATE employee_salary 
+    SET salary = salary - amount 
+    WHERE employee_id = sender;
 
-    commit;
-end;$$;
+    UPDATE employee_salary 
+    SET salary = salary + amount 
+    WHERE employee_id = receiver;
 
-call transfer(2, 1, 10000);
+    COMMIT;
+END $$
+
+DELIMITER ;
+
+-- Call Procedure
+CALL transfer_amount(2, 1, 10000);
 
 -- Roles & Permissions
-SELECT rolname FROM pg_roles;
+SELECT User, Host FROM mysql.user;
 
--- Create Role
-CREATE ROLE Hello
-LOGIN 
-PASSWORD 'mypassword1';
+-- Create User
+CREATE USER 'hello'@'localhost' IDENTIFIED BY 'mypassword1';
 
--- Create Superuser Role
-CREATE ROLE Admin
-SUPERUSER 
-LOGIN 
-PASSWORD 'mypassword1';
+-- Create Admin / Superuser
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'mypassword1';
+GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
 
--- Create Database Role
-CREATE ROLE dba 
-CREATEDB 
-LOGIN 
-PASSWORD 'Abcd1234';
+-- Create Database Manager
+CREATE USER 'dba'@'localhost' IDENTIFIED BY 'Abcd1234';
+GRANT CREATE, ALTER, DROP, INDEX ON *.* TO 'dba'@'localhost';
 
--- Create Validity Role
-CREATE ROLE QQQ WITH
-LOGIN
-PASSWORD 'securePass1'
-VALID UNTIL '2030-01-01';
+-- Create user with expiration 
+CREATE USER 'qqq'@'localhost' IDENTIFIED BY 'securePass1' PASSWORD EXPIRE INTERVAL 180 DAY;
 
--- Create Connection Limit Role
-CREATE ROLE WWW
-LOGIN
-PASSWORD 'securePass1'
-CONNECTION LIMIT 1000;
+-- Create user with connection limit
+CREATE USER 'www'@'localhost' IDENTIFIED BY 'securePass1';
+ALTER USER 'www'@'localhost' WITH MAX_USER_CONNECTIONS 1000;
+
+-- Grant permissions to user
+GRANT SELECT, INSERT, UPDATE, DELETE ON employee_management.* TO 'hello'@'localhost';
+
+-- Revoke permissions from user
+REVOKE INSERT, UPDATE ON employee_management.* FROM 'hello'@'localhost';
 
 -- Alter Role
 ALTER ROLE Admin SUPERUSER;
 
--- Drop Role
-Drop ROLE Admin;
+-- Drop User
+DROP USER 'admin'@'localhost';
 
--- Grant Role Permission
-GRANT privilege_list | ALL 
-ON  table_name
-TO  role_name;
 
--- Revoke Role Permission
-REVOKE privilege | ALL
-ON TABLE tbl_name 
-FROM role_name;
 
-select * from pg_user;
 
-ALTER TABLE players OWNER TO admin;
-
-select * from players;
-
-INSERT INTO players(first_name, last_name, email, phone)
-VALUES('raju', 'kumar', 'raju.kumar@geeksforgeeks.org', '408-111-2222');
-
-GRANT ALL
-ON  players
-TO  admin;
-
-REVOKE ALL
-ON TABLE players
-FROM admin;
-
-SELECT current_user;
-
-CREATE ROLE admin WITH LOGIN SUPERUSER PASSWORD 'admin@123';
-ALTER ROLE postgres WITH LOGIN;
-ALTER ROLE admin WITH SUPERUSER;
-SELECT current_user, session_user;
-
-SELECT rolname, rolsuper, rolcanlogin 
-FROM pg_roles 
-WHERE rolname = 'admin';
 
 
 
