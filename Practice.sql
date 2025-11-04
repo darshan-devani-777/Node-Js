@@ -210,58 +210,92 @@ SELECT
     END AS salary_category
 FROM employee_salary;
 
--- Loop 
-do $$
-declare
-  n integer:= 6;
-  cnt integer := 1 ;  
-begin
-loop  
- exit when cnt = n ;
- raise notice '%', cnt;  
- cnt := cnt + 1 ;  
-end loop;  
-end; $$;
+-- Loop
+CREATE PROCEDURE number_loop()
+BEGIN
+    DECLARE n INT DEFAULT 6;
+    DECLARE cnt INT DEFAULT 1;
+
+    loop_label: LOOP
+        IF cnt = n THEN
+            LEAVE loop_label;
+        END IF;
+
+        SELECT cnt;
+        SET cnt = cnt + 1;
+    END LOOP loop_label;
+END$$
+
 
 -- For Loop
-DO $$
+DELIMITER $$
+
+CREATE PROCEDURE for_loop_example()
 BEGIN
-    FOR cnt IN 1..10 LOOP
-        RAISE NOTICE 'cnt: %', cnt;
-    END LOOP;
-END; $$
+    DECLARE cnt INT DEFAULT 1;
+
+    loop_label: LOOP
+        IF cnt > 10 THEN
+            LEAVE loop_label;
+        END IF;
+
+        SELECT CONCAT('cnt: ', cnt);
+        SET cnt = cnt + 1;
+    END LOOP loop_label;
+END$$
+
+DELIMITER ;
+
+CALL for_loop_example();  -- Call the procedure
 
 -- Exit Statement
-DO $$
-DECLARE
-  n INTEGER := 8;
-  cnt INTEGER := 1;  
+DELIMITER $$
+
+CREATE PROCEDURE loop_example()
 BEGIN
-  LOOP  
-    EXIT WHEN cnt > 5;
-    RAISE NOTICE '%', cnt;  
-    cnt := cnt + 1;  
-  END LOOP;  
-END $$;
+    DECLARE n INT DEFAULT 8;
+    DECLARE cnt INT DEFAULT 1;
+
+    loop_label: LOOP
+        IF cnt > 5 THEN
+            LEAVE loop_label;
+        END IF;
+
+        SELECT cnt;
+        SET cnt = cnt + 1;
+    END LOOP loop_label;
+END$$
+
+DELIMITER ;
+
+CALL loop_example();  -- Call the procedure
 
 -- Continue Statement
-do
-$$
-declare
-  cnt int = 0;
-begin
- loop
- -- increment of cnt
-    cnt = cnt + 1;
- -- exit the loop if cnt > 10
- exit when cnt > 10;
- -- skip the iteration if cnt is an odd number
- continue when mod(cnt,2) = 1;
- -- print out the cnt
- raise notice '%', cnt;
- end loop;
-end;
-$$;
+DELIMITER $$
+
+CREATE PROCEDURE continue_example()
+BEGIN
+    DECLARE cnt INT DEFAULT 0;
+
+    loop_label: LOOP
+        SET cnt = cnt + 1;
+
+        IF cnt > 10 THEN
+            LEAVE loop_label;
+        END IF;
+
+        IF MOD(cnt, 2) = 1 THEN
+            ITERATE loop_label;   
+        END IF;
+
+        SELECT cnt;               -- prints 2,4,6,8,10
+    END LOOP loop_label;
+
+END$$
+
+DELIMITER ;
+
+CALL continue_example();  -- Call the procedure
 
 -- Transactions
 SET autocommit = 0;
