@@ -383,8 +383,83 @@ ALTER ROLE Admin SUPERUSER;
 -- Drop User
 DROP USER 'admin'@'localhost';
 
+-- Windows Functions
+CREATE TABLE test_data (
+    new_id INT,
+    new_cat VARCHAR(20)
+);
 
+INSERT INTO test_data (new_id, new_cat) VALUES
+(100, 'Sales'),
+(200, 'Sales'),
+(200, 'Finance'),
+(300, 'Sales'),
+(300, 'Finance'),
+(400, 'Finance'),
+(500, 'Sales');
 
+-- With Aggregate Functions
+SELECT 
+    new_id, 
+    new_cat,
+    SUM(new_id) OVER(PARTITION BY new_cat ORDER BY new_id) AS "Total",
+    AVG(new_id) OVER(PARTITION BY new_cat ORDER BY new_id) AS "Average",
+    COUNT(new_id) OVER(PARTITION BY new_cat ORDER BY new_id) AS "Count",
+    MIN(new_id) OVER(PARTITION BY new_cat ORDER BY new_id) AS "Min",
+    MAX(new_id) OVER(PARTITION BY new_cat ORDER BY new_id) AS "Max"
+FROM test_data;
+
+-- With Ranking Functions
+SELECT 
+    new_id,
+    new_cat,
+    ROW_NUMBER() OVER (ORDER BY new_id) AS "ROW_NUMBER",
+    RANK()       OVER (ORDER BY new_id) AS "RANK",
+    DENSE_RANK() OVER (ORDER BY new_id) AS "DENSE_RANK",
+    PERCENT_RANK() OVER (ORDER BY new_id) AS "PERCENT_RANK"
+FROM test_data;
+
+-- With Lead & Lag Functions
+SELECT 
+    new_id,
+    new_cat,
+    FIRST_VALUE(new_id) OVER (ORDER BY new_id) AS "FIRST_VALUE",
+    LAST_VALUE(new_id)  OVER (ORDER BY new_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS "LAST_VALUE",
+    LEAD(new_id) OVER (ORDER BY new_id) AS "LEAD",
+    LAG(new_id)  OVER (ORDER BY new_id) AS "LAG"
+FROM test_data;
+
+-- Rollup / Cube / Grouping Sets
+CREATE TABLE sales (
+  region VARCHAR(20),
+  product VARCHAR(20),
+  amount INT
+);
+
+INSERT INTO sales (region, product, amount) VALUES
+('East', 'Pen', 100),
+('East', 'Pencil', 150),
+('West', 'Pen', 200),
+('West', 'Pencil', 250);
+
+-- Rollup - Subtotals + Grand Total
+SELECT region, product, SUM(amount) AS total_sales
+FROM sales
+GROUP BY region, product WITH ROLLUP;
+
+-- Cube - Region totlas + Product totals + Grand Total
+SELECT region, product, SUM(amount) AS total_sales
+FROM sales
+GROUP BY region, product WITH CUBE;
+
+-- Grouping Sets - Custom groupings
+SELECT region, product, SUM(amount) AS total_sales
+FROM sales
+GROUP BY GROUPING SETS (
+  (region, product),  -- normal group
+  (region),           -- subtotal by region
+  ()                  -- grand total
+);
 
 
 
