@@ -116,7 +116,6 @@ UNION
 SELECT first_name, last_name
 FROM employee;
 
-
 -- UNION ALL (keeps duplicates)
 SELECT first_name, last_name
 FROM employee
@@ -130,25 +129,6 @@ FROM employee
 INTERSECT
 SELECT employee_id
 FROM employee_salary;
-
--- Index
-SELECT 
-    tablename, 
-    indexname, 
-    indexdef 
-FROM 
-    pg_indexes 
-WHERE 
-    tablename = 'employee';
-
--- Index
-CREATE INDEX idx_age
-ON employee(age);
-
-EXPLAIN SELECT * FROM employee
-WHERE age = 60;
-
-DROP INDEX IF EXISTS idx_age;	
 
 -- Max()
 SELECT first_name, last_name, age
@@ -184,7 +164,7 @@ SELECT FORMAT('Hello, %s', 'Geeks!!');
 SELECT UPPER('geeksforgeeks');
 SELECT LOWER('GEEKSFORGEEKS');
 SELECT CAST ('100' AS INTEGER);
-SELECT '100'::INTEGER; -- ::cast operator
+SELECT CONVERT('100', SIGNED); -- Convert String to Integer
 SELECT REGEXP_MATCHES('ABC', '^(A)(..)$', 'g');
 SELECT REGEXP_REPLACE('Hello World', '(.*) (.*)', '\2, \1');
 SELECT REGEXP_REPLACE('ABC12345xyz', '[[:alpha:]]', '', 'g');
@@ -192,7 +172,7 @@ SELECT REPLACE('Hello World', 'World', 'PostgreSQL') AS replaced_string;
 
 -- If Statement
 SELECT 
-    employee_id,
+    employee_id,        
     salary,
     IF(salary >= 70000, 'High',
         IF(salary BETWEEN 60000 AND 69000, 'Medium', 'Low')
@@ -211,6 +191,8 @@ SELECT
 FROM employee_salary;
 
 -- Loop
+DELIMITER $$
+
 CREATE PROCEDURE number_loop()
 BEGIN
     DECLARE n INT DEFAULT 6;
@@ -226,6 +208,8 @@ BEGIN
     END LOOP loop_label;
 END$$
 
+DELIMITER ;
+CALL number_loop();  -- Call the procedure
 
 -- For Loop
 DELIMITER $$
@@ -240,7 +224,7 @@ BEGIN
         END IF;
 
         SELECT CONCAT('cnt: ', cnt);
-        SET cnt = cnt + 1;
+        SET cnt = cnt + 1;       --  1,2,3,4,5
     END LOOP loop_label;
 END$$
 
